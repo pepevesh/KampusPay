@@ -1,14 +1,34 @@
 const mongoose = require('mongoose');
 const User = require('../model/User');
 const Transaction = require('../model/Transaction');
+const Coupon = require('../model/Coupon');
 
 exports.createTransaction = async (req, res) => {
-    const { senderId, receiverId, amount, category } = req.body;
+    const { senderId, receiverId, amount, category, couponId } = req.body;
 
     const session = await mongoose.startSession();
     session.startTransaction();
+    sendAmount = amount;
 
     try {
+        if(couponId){
+            const user = await User.findOne({userId: senderId});
+            const isCouponUsed = user.usedCoupons.includes(couponId);
+
+            if(isCouponUsed){
+                return res.status(200).json({ success: true, message: 'Coupon already used.' });
+            }
+
+            const coupon = await Coupon.findOne({ couponId: couponId});
+
+            if (!coupon) {
+                return res.status(404).json({ success: false, message: 'Coupon not found in the database.' });
+            }
+
+            const discount = coupon.discountValue;
+
+            sendAmount -= discount;
+        }
         const sender = await User.findOne({ userId: senderId }).session(session);
         const receiver = await User.findOne({ userId: receiverId }).session(session);
 
@@ -16,11 +36,11 @@ exports.createTransaction = async (req, res) => {
             throw new Error('Sender or Receiver not found.');
         }
 
-        if (sender.balance < amount) {
+        if (sender.balance < sendAmount) {
             throw new Error('Insufficient balance.');
         }
 
-        sender.balance -= amount;
+        sender.balance -= sendAmount;
         receiver.balance += amount;
 
         await sender.save({ session });
@@ -38,6 +58,10 @@ exports.createTransaction = async (req, res) => {
         // Update the Transactions array for both sender and receiver
         sender.transactions.push(savedTransaction);
         receiver.transactions.push(savedTransaction);
+
+        if(couponId){
+            sender.usedCoupons.push(couponId);
+        }
 
         await sender.save({ session });
         await receiver.save({ session });
