@@ -24,6 +24,7 @@ app.use('/api/user',require('./routes/userRoutes'));
 app.use('/api/coupon',require('./routes/couponRoutes'));
 app.use('/api/transaction',require('./routes/transactionRoutes'));
 app.use('/api/payment',require('./routes/paymentRoutes'));
+app.use('/api/payout',require('./routes/payoutRoutes'));
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URL)
