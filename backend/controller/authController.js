@@ -136,15 +136,17 @@ const refreshAccessToken = async (req, res) => {
         const { refreshToken } = req.cookies;
         if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
 
+        // Verify the refresh token
         const person = jwt.verify(refreshToken, refreshTokenSecret);
-        const storedRefreshToken = await redisClient.get(`refreshToken:${user.id}`);
+        const storedRefreshToken = await redisClient.get(`refreshToken:${person.id}`);
 
         if (refreshToken !== storedRefreshToken) {
             return res.status(403).json({ message: "Invalid refresh token" });
         }
 
-            const user = {
-            id: person._id,
+        // Recreate the user object from the decoded token
+        const user = {
+            id: person.id,
             userId: person.userId,
             name: person.name,
             role: person.role,
@@ -152,8 +154,9 @@ const refreshAccessToken = async (req, res) => {
             balance: person.balance,
             dailyLimit: person.dailyLimit,
             availability: person?.availability,
-
         };
+
+        // Generate a new access token
         const accessToken = jwt.sign(user, accessTokenSecret, { expiresIn: '15m' });
 
         res.json({ accessToken });
@@ -162,5 +165,6 @@ const refreshAccessToken = async (req, res) => {
         res.status(403).json({ message: "Invalid refresh token" });
     }
 };
+
 
 module.exports = { login, logout, refreshAccessToken, validateToken};

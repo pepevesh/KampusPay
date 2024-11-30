@@ -15,10 +15,12 @@ const Navbar = () => {
     { name: 'wallet', icon: Wallet2, label: 'Wallet' },
     { name: 'profile', icon: User, label: 'Profile' },
   ];
+  
   if(!isAuthenticated) return null;
+
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-safe">
-      <nav className="bg-white rounded-t-2xl shadow-lg w-full max-w-md">
+      <nav className="bg-white rounded-t-2xl shadow-lg w-full max-w-md md:max-w-7xl">
         <div className="relative flex items-center justify-between px-6 py-2">
           <div className="flex justify-between w-full">
             <Link 
@@ -28,11 +30,11 @@ const Navbar = () => {
               }`}
               onClick={() => setActive('home')}
             >
-              <Home className="h-6 w-6" />
+              <Home className="h-6 w-6 md:h-10 md:w-10 " />
               <span className="text-xs font-medium">Home</span>
             </Link>
             
-            <div className="flex justify-between w-1/2 max-w-[140px] relative">
+            <div className="flex justify-between w-1/2 sm:max-w-[140px] md:max-w-screen-md relative">
               <Link 
                 href="/"
                 className={`flex flex-col items-center gap-1 ${
@@ -40,7 +42,7 @@ const Navbar = () => {
                 } relative left-[-15px]`}
                 onClick={() => setActive('scan')}
               >
-                <ScanLine className="h-6 w-6" />
+                <ScanLine className="h-6 w-6 md:h-10 md:w-10 " />
                 <span className="text-xs font-medium">Scan</span>
               </Link>
               
@@ -51,7 +53,7 @@ const Navbar = () => {
                 } relative right-[-8px]`}
                 onClick={() => setActive('wallet')}
               >
-                <Wallet2 className="h-6 w-6" />
+                <Wallet2 className="h-6 w-6 md:h-10 md:w-10 " />
                 <span className="text-xs font-medium">Wallet</span>
               </Link>
             </div>
@@ -63,7 +65,7 @@ const Navbar = () => {
               }`}
               onClick={() => setActive('profile')}
             >
-              <User className="h-6 w-6" />
+              <User className="h-6 w-6 md:h-10 md:w-10 " />
               <span className="text-xs font-medium">Profile</span>
             </Link>
           </div>
@@ -71,15 +73,15 @@ const Navbar = () => {
           {/* Center Image */}
           <Link 
             href="/"
-            className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center h-14 w-14 rounded-full bg-[#7F3DFF] overflow-hidden shadow-lg z-10"
+            className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center h-14 w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 rounded-full bg-[#7F3DFF] overflow-hidden shadow-lg z-10"
             aria-label="Main action"
             onClick={() => setActive('action')}
           >
             <Image
               src="/web-app-manifest-512x512.png"
               alt="App logo"
-              width={56}
-              height={56}
+              width={80}
+              height={80}
               className="object-cover"
             />
           </Link>
@@ -90,4 +92,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
