@@ -15,12 +15,13 @@ export default function RegisterForm() {
   const API_URL= process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter()
   const [formData, setFormData] = useState({
-    id: "",
+    userId: "",
     name: "",
     email: "",
     password: "",
-    pin: ""
-  })
+    pin: "",
+  });
+  
   const [otp, setOtp] = useState("")
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
@@ -70,16 +71,23 @@ export default function RegisterForm() {
   // Register the user after OTP is verified
   const handleRegisterUser = async () => {
     try {
-      const response = await axios.post(API_URL+'/api/user/createUser', formData)
+      const response = await axios.post(`${API_URL}/api/user/createUser`, {
+        userId: formData.userId,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        pin: formData.pin,
+      });
       if (response.data.success) {
-        setIsSuccessModalOpen(true)
+        setIsSuccessModalOpen(true);
       } else {
-        console.error('Registration failed')
+        console.error('Registration failed:', response.data.message);
       }
     } catch (error) {
-      console.error('Error during registration:', error)
+      console.error('Error during registration:', error);
     }
-  }
+  };
+  
 
   const handleSuccessModalClose = () => {
     setIsSuccessModalOpen(false)
@@ -107,13 +115,13 @@ export default function RegisterForm() {
         <CardContent>
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
             <div className="space-y-2">
-              <Label htmlFor="id" className="text-gray-300">ID (Roll no)</Label>
+            <Label htmlFor="userId" className="text-gray-300">User ID (Roll no)</Label>
               <Input
-                id="id"
+                id="userId"
                 placeholder="21BD1A661O"
                 required
                 className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]"
-                value={formData.id}
+                value={formData.userId}
                 onChange={handleInputChange} />
             </div>
 
