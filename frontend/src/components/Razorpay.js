@@ -37,6 +37,7 @@ const RazorpayPayment = ({ onClose }) => {
 
     try {
         const id= user.userId;
+      console.log(amount)
       const response = await fetch("http://localhost:4000/api/payment/makePayment", {
         method: "POST",
         headers: {
