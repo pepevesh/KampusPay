@@ -45,7 +45,7 @@ const Navbar = () => {
               </Link>
               
               <Link 
-                href="/"
+                href="/wallet"
                 className={`flex flex-col items-center gap-1 ${
                   active === 'wallet' ? 'text-[#7F3DFF]' : 'text-gray-400'
                 } relative right-[-8px]`}
