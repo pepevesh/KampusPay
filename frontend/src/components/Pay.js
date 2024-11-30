@@ -48,11 +48,55 @@ export default function Pay() {
             <p className="text-sm text-gray-400">Vendor ID: {vendorId || 'Not specified'}</p>
           </div>
 
-          {/* Rest of the component remains the same */}
+          <div className="flex justify-center mb-4">
+            <div className="bg-black rounded-full p-4">
+              <Utensils className="w-12 h-12" />
+            </div>
+          </div>
 
+          <div className="text-center mb-4">
+            <h2 className="text-lg mb-1">Canteen</h2>
+            <div className="text-4xl font-bold flex items-center justify-center gap-1">
+              {amount}
+              <span className="text-lg">₹</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <Button
+                key={num}
+                variant="ghost"
+                className="h-12 text-2xl hover:bg-zinc-800"
+                onClick={() => handleNumberClick(num.toString())}
+              >
+                {num}
+              </Button>
+            ))}
+            <Button
+              variant="ghost"
+              className="h-12 text-2xl hover:bg-zinc-800 col-start-1"
+              onClick={() => handleNumberClick("0")}
+            >
+              0
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-12 text-2xl hover:bg-zinc-800 col-start-3"
+              onClick={handleDelete}
+            >
+              <X className="w-6 h-6" />
+            </Button>
+          </div>
+
+          <Button
+            className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+            onClick={handlePayment}
+          >
+            Make Payment
+          </Button>
         </div>
       </Card>
     </div>
   )
 }
-

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Card } from "@/components/ui/card"
@@ -19,17 +19,31 @@ export default function Scanner() {
   const [hasCamera, setHasCamera] = useState(false)
   const [key, setKey] = useState(0) // Add a key state to force re-render
   const router = useRouter()
+  const videoRef = useRef(null);
 
   useEffect(() => {
     // Check if the browser supports getUserMedia
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true })
-        .then(() => setHasCamera(true))
-        .catch(() => setError('Camera access is required to scan QR codes'))
+        .then(() => {
+          console.log('Camera access granted');
+          setHasCamera(true);
+        })
+        .catch((err) => {
+          console.error('Camera access error:', err);
+          setError(`Camera access is required to scan QR codes. Error: ${err.message}`);
+        });
     } else {
-      setError('Your browser does not support camera access')
+      console.error('getUserMedia is not supported');
+      setError('Your browser does not support camera access');
     }
   }, [])
+
+  useEffect(() => {
+    if (hasCamera) {
+      console.log('QrReader component should mount now');
+    }
+  }, [hasCamera]);
 
   const handleScan = (data) => {
     if (data) {
@@ -56,6 +70,18 @@ export default function Scanner() {
     setError(null) // Clear any previous errors
   }
 
+  useEffect(() => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      }
+    }
+  }, [videoRef]);
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Card className="w-full max-w-md bg-gray-800 text-gray-100 border-gray-700">
@@ -63,19 +89,29 @@ export default function Scanner() {
           <h1 className="text-2xl font-bold text-center mb-4">Scan QR Code</h1>
           <div className="mb-4">
             {hasCamera ? (
-              <QrReader
-                key={key}
-                onResult={(result) => {
-                  if (result) {
-                    handleScan(result.text);
-                  }
-                }}
-                constraints={{
-                  facingMode: 'environment'
-                }}
-                containerStyle={{ width: '100%' }}
-                videoStyle={{ width: '100%' }}
-              />
+              <>
+                <div className="text-center text-white mb-2">Camera should open below:</div>
+                <QrReader
+                  key={key}
+                  onResult={(result) => {
+                    if (result) {
+                      console.log('QR code scanned:', result);
+                      handleScan(result.text);
+                    }
+                  }}
+                  constraints={{
+                    facingMode: 'environment'
+                  }}
+                  videoId="qr-video"
+                  videoRef={videoRef}
+                  containerStyle={{ width: '100%' }}
+                  videoStyle={{ width: '100%' }}
+                  onError={(error) => {
+                    console.error('QrReader error:', error);
+                    setError(`QR Scanner error: ${error.message || 'Unknown error'}`);
+                  }}
+                />
+              </>
             ) : (
               <div className="text-center text-yellow-500 mb-4">
                 {error || 'Checking camera access...'}
