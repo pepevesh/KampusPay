@@ -49,10 +49,12 @@ export default function RegisterForm() {
   // Verify OTP entered by the user
   const handleOtpVerification = async () => {
     try {
+      console.log("sadasasd")
       const response = await axios.post(API_URL+'/api/user/verifyuserotp', {
         email: formData.email,
         otp
       })
+      console.log(response.data)
       if (response.data.success) {
         console.log("done")
         setIsOtpModalOpen(false)
