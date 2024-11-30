@@ -1,5 +1,6 @@
 const Razorpay = require("razorpay");
 const User = require('../model/User');
+const {redisClient} = require('../config/redisdatabase');
 require('dotenv').config();
 
 // Initialize Razorpay instance
@@ -20,10 +21,12 @@ exports.makePayment = async (req, res) => {
 
   try {
     const order = await razorpay.orders.create(options);
-    const user = await User.findOne({ userId });
+    // const user = await User.findOne({ userId });
+    await redisClient.set(order.id, userId,{EX:10*60});
+    // const user = await User.findOne({ userId });
 
-    user.balance += amount;
-    await user.save();
+    // user.balance += amount;
+    // await user.save();
 
     res.status(200).json({
       id: order.id,
@@ -34,4 +37,20 @@ exports.makePayment = async (req, res) => {
     console.error("Error creating Razorpay order:", error);
     res.status(500).json({ error: "Failed to create Razorpay order" });
   }
+};
+
+exports.webhook= async(req, res) => {
+    try{    
+        const {payload}= req.body;
+        const orderid=payload.payment.entity.order_id;
+        const userId =redisClient.get(orderid);
+        console.log(userId);
+        const user = await User.findOne({ userId });
+        user.balance += amount;
+        await user.save();
+    }
+    catch(error){
+        console.error("Error creating Razorpay order:", error);
+        res.status(500).json({ error: "Failed to create Razorpay order" });
+    }
 };
