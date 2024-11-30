@@ -1,5 +1,5 @@
 const User = require('../model/User');
-const {hashPassword} = require('../utils/passwordUtils');
+const {comparePassword,hashPassword} = require('../utils/passwordUtils');
 const crypto = require('crypto');
 const { redisClient} = require('../config/redisdatabase');
 const {sendOTPEmail}= require('../services/OTPservice');
@@ -40,21 +40,23 @@ exports.verifyOtp = async (req, res) => {
     }
 };
 
-
 exports.createUser = async (req, res) => {
     try {
-        const { userId, name, role, email, password, balance, pin, } = req.body;
+        let { userId, name, role, email, password, balance, pin } = req.body;  // Use 'let' instead of 'const'
 
         const existingUser = await User.findOne({ userId });
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
-        const dailyLimit=100; 
-        const transactions =[];
-        const usedCoupons=[];
-        // Hash the password, pin before saving
+
+        const dailyLimit = 100; 
+        const transactions = [];
+        const usedCoupons = [];
+
+        // Hash the password and pin before saving
         password = await hashPassword(password);
         pin = await hashPassword(pin);
+
         const newUser = new User({
             userId, name, role, email, password, balance, pin, dailyLimit, transactions, usedCoupons
         });
@@ -63,5 +65,94 @@ exports.createUser = async (req, res) => {
         res.status(200).json({ success: true, message: "User created successfully" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// exports.updateUser = async (req, res) => {
+//     try {
+//         const { userId } = req.user;  // Assume the user ID comes from a validated token or session
+//         const { password, pin } = req.body;
+//         const user = await User.findOne({ userId });
+//         console.log(user);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+
+//         if (password)  {
+//            user.password = await hashPassword(password);
+//         }
+
+//         if (pin) {
+//             user.pin = await hashPassword(pin); 
+//         }
+//         await user.save();
+
+//         res.status(200).json({ message: 'User updated successfully' });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Internal server error', error: error.message });
+//     }
+// };
+
+exports.updatePassword = async (req, res) => {
+    try {
+        const { userId } = req.user;  // Extract userId from token/session
+        const { currentPassword, newPassword } = req.body;
+
+        // Validate input
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current and new password are required' });
+        }
+
+        // Find the user
+        const user = await User.findOne({ userId });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const passwordCheck = await comparePassword(currentPassword, user.password);
+        if (!passwordCheck) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        // Hash and update the new password
+        user.password = await hashPassword(newPassword);
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+
+exports.updatePin = async (req, res) => {
+    try {
+        const { userId } = req.user;  // Extract userId from token/session
+        const { currentPin, newPin } = req.body;
+
+        // Validate input
+        if (!currentPin || !newPin) {
+            return res.status(400).json({ message: 'Current and new PIN are required' });
+        }
+
+        // Find the user
+        const user = await User.findOne({ userId });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the current PIN is correct
+        const isPinValid = comparePassword(currentPin.toString(), user.pin);
+        if (!isPinValid) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        // Hash and update the new PIN
+        user.pin = await hashPassword(newPin.toString()); 
+        await user.save();
+
+        res.status(200).json({ message: 'PIN updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };

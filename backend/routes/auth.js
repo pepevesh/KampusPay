@@ -6,5 +6,4 @@ router.post('/login',authcontroller.login);
 router.post('/logout',authcontroller.logout);
 router.post('/token', authcontroller.refreshAccessToken);
 router.get('/validate',authcontroller.validateToken);
-router.post('/update', authcontroller.updateUser);
 module.exports = router;
