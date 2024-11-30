@@ -3,8 +3,7 @@ const { validationResult } = require('express-validator');
 const User = require("../model/User");
 const dotenv = require('dotenv');
 const { redisClient } = require('../config/redisdatabase');
-const { comparePassword, hashPassword} = require('../utils/passwordUtils');
-const bcrypt = require('bcrypt');   
+const { comparePassword, hashPassword} = require('../utils/passwordUtils');  
 
 dotenv.config();
 
@@ -26,15 +25,10 @@ const login = async (req, res) => {
             return res.status(401).json({ message: "Employee Does Not Exist" });
         }
 
-        const passwordCheck = await comparePassword(password, employee.password);
+        const passwordCheck = await comparePassword(password, person.password);
         if (!passwordCheck) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
-
-        // if (password !== person.password) {
-        //     return res.status(401).json({ message: "Invalid credentials" });
-        // }
-        
       
         const user = {
             id: person._id,
@@ -166,30 +160,4 @@ const refreshAccessToken = async (req, res) => {
     }
 };
 
-const updateUser = async (req, res) => {
-    try {
-        // const { userId } = req.user;  // Assume the user ID comes from a validated token or session
-        const { userId, password, pin } = req.body;
-        const user = await User.findOne({ userId });
-        console.log(user);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        if (password)  {
-           user.password = await hashPassword(password);
-        }
-
-        if (pin) {
-            user.pin = await hashPassword(pin); 
-        }
-        await user.save();
-
-        res.status(200).json({ message: 'User updated successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-};
-
-
-module.exports = { login, logout, refreshAccessToken, validateToken, updateUser};
+module.exports = { login, logout, refreshAccessToken, validateToken};

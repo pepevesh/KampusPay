@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
         default: 0,
     },
     pin: {
-        type: Number,
+        type: String,
         required: true,
     },
     dailyLimit: {
