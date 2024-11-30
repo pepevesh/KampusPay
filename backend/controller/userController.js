@@ -29,7 +29,7 @@ exports.verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
         const redotp = await redisClient.get(email);
-        if (redotp === otp) {
+        if (redotp === String(otp)) {
             redisClient.del(email);
             return res.status(200).json({ success: true, message: "OTP verified successfully" });
         } else {
