@@ -21,6 +21,8 @@ connectRedis();
 
 app.use('/api/auth',require('./routes/auth'));
 app.use('/api/user',require('./routes/userRoutes'));
+app.use('/api/coupon',require('./routes/couponRoutes'));
+app.use('/api/transaction',require('./routes/transactionRoutes'));
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URL)
