@@ -9,6 +9,7 @@ dotenv.config();
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+const protectionTokenSecret = process.env.PROTECTION_TOKEN_SECRET;
 
 // Login function
 const login = async (req, res) => {
@@ -18,9 +19,9 @@ const login = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { userId, password, rememberMe } = req.body;
+        const { userId, password} = req.body;
+        const rememberMe = false;
         const person = await User.findOne({ userId });
-
         if (!person) {
             return res.status(401).json({ message: "Employee Does Not Exist" });
         }
@@ -38,19 +39,21 @@ const login = async (req, res) => {
             email: person.email,
             balance: person.balance,
             dailyLimit: person.dailyLimit,
-            availability: person.availability,
+            availability: person?.availability,
 
         };
 
         const accessToken = jwt.sign(user, accessTokenSecret, { expiresIn: '15m' });
-
+        let protectionToken;
         let refreshToken;
 
         if (rememberMe) {
+            protectionToken=jwt.sign(user,protectionTokenSecret,{ expiresIn: '7d' });
             refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: '7d' });
             await redisClient.set(`refreshToken:${user.id}`, refreshToken, { EX: 7 * 24 * 60 * 60 });
         } else {
             refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: '6h' });
+            protectionToken=jwt.sign(user,protectionTokenSecret,{ expiresIn: '6h' });
             await redisClient.set(`refreshToken:${user.id}`, refreshToken, { EX: 6 * 60 * 60 });
         }
         // Set refresh token as an HTTP-only cookie
@@ -61,7 +64,7 @@ const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        res.json({ accessToken, user });
+        res.json({ accessToken, user,protectionToken });
     } catch (error) {
         console.error("Error in login:", error.message);
         res.status(500).json({ message: "Internal server error" });
@@ -93,7 +96,7 @@ const validateToken = (req, res) => {
                 email: decoded.email,
                 balance: decoded.balance,
                 dailyLimit: decoded.dailyLimit,
-                availability: decoded.availability
+                availability: decoded?.availability
             };
             res.status(200).json({ valid: true, user });
         });
@@ -148,7 +151,7 @@ const refreshAccessToken = async (req, res) => {
             email: person.email,
             balance: person.balance,
             dailyLimit: person.dailyLimit,
-            availability: person.availability,
+            availability: person?.availability,
 
         };
         const accessToken = jwt.sign(user, accessTokenSecret, { expiresIn: '15m' });

@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation'; 
+import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
-// import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext();
+
 const AuthProviderWithRouter = ({ children }) => {
-  const pathname= usePathname();
+  const pathname = usePathname();
   const [accessToken, setAccessToken] = useState(null);
   const [user, setUser] = useState(null);
   const router = useRouter();
@@ -21,11 +22,9 @@ const AuthProviderWithRouter = ({ children }) => {
       );
       setAccessToken(response.data.accessToken);
       setUser(response.data.user);
-      console.log(response.data.user);
       localStorage.setItem('accessToken', response.data.accessToken);
-    //   Cookies.set('protectionToken',response.data.protectionToken, {path: '' });
-      // localStorage.setItem('protectionToken', response.data.protectionToken);
-      router.push('/employee/dashboard');
+      Cookies.set('protectionToken', response.data.protectionToken, { path: '/' });
+      router.push('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
@@ -42,8 +41,8 @@ const AuthProviderWithRouter = ({ children }) => {
       setAccessToken(null);
       setUser(null);
       localStorage.removeItem('accessToken');
-    //   Cookies.remove('protectionToken');
-      router.push('/employee');
+      Cookies.remove('protectionToken');
+      router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -66,13 +65,12 @@ const AuthProviderWithRouter = ({ children }) => {
       setUser(null);
       localStorage.removeItem('accessToken');
       Cookies.remove('protectionToken');
-      router.push('/employee');
+      router.push('/login');
       return false;
     }
   };
 
   useEffect(() => {
-    console.log(user);
     const initializeAuth = async () => {
       const storedAccessToken = localStorage.getItem('accessToken');
       if (storedAccessToken) {
@@ -81,28 +79,20 @@ const AuthProviderWithRouter = ({ children }) => {
             headers: { Authorization: `Bearer ${storedAccessToken}` },
             withCredentials: true,
           });
-          console.log(validationResponse)
           setAccessToken(storedAccessToken);
           setUser(validationResponse.data.user);
         } catch (error) {
-          console.log('Access token invalid, attempting refresh...');
           const success = await refreshAccessToken();
           if (!success) {
             console.log('Refresh failed, logging out.');
           }
         }
-      } else {
-        console.log('No access token found, redirecting to login.');
-        console.log(pathname);
-        if(pathname.startsWith("/employee")){
-          router.push('/employee');
-        }
+      } else if (!['/login', '/register', '/'].includes(pathname)) {
+        router.push('/');
       }
     };
 
-    if (typeof window !== 'undefined') {
-      initializeAuth();
-    }
+    initializeAuth();
 
     const syncAuthAcrossTabs = () => {
       setAccessToken(localStorage.getItem('accessToken'));
@@ -112,7 +102,7 @@ const AuthProviderWithRouter = ({ children }) => {
     return () => {
       window.removeEventListener('storage', syncAuthAcrossTabs);
     };
-  }, [router]);
+  }, [router, pathname]);
 
   return (
     <AuthContext.Provider value={{ token: accessToken, user, isAuthenticated: !!accessToken, login, logout }}>

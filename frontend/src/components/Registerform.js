@@ -189,7 +189,7 @@ export default function RegisterForm() {
       </Card>
 
       {/* OTP Verification Modal */}
-      <Dialog open={isOtpModalOpen} onOpenChange={setIsOtpModalOpen}>
+      <Dialog open={isOtpModalOpen} onOpenChange={setIsOtpModalOpen} className="max-w-[350px] md:max-w-md">
         <DialogContent className="bg-gray-800 text-gray-100 border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-[#7F3DFF]">OTP Verification</DialogTitle>

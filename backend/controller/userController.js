@@ -42,7 +42,7 @@ exports.verifyOtp = async (req, res) => {
 
 exports.createUser = async (req, res) => {
     try {
-        let { userId, name, role, email, password, balance, pin } = req.body;  // Use 'let' instead of 'const'
+        let { userId, name, email, password,  pin } = req.body;  // Use 'let' instead of 'const'
 
         const existingUser = await User.findOne({ userId });
         if (existingUser) {
@@ -52,7 +52,8 @@ exports.createUser = async (req, res) => {
         const dailyLimit = 100; 
         const transactions = [];
         const usedCoupons = [];
-
+        const balance=0;
+        const role="Student";
         // Hash the password and pin before saving
         password = await hashPassword(password);
         pin = await hashPassword(pin);
