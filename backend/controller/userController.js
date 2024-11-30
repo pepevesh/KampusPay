@@ -132,3 +132,39 @@ exports.updatePin = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
+
+exports.getUserTransactions = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findOne({ userId }).populate({
+            path: 'transactions',
+        });
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found.' });
+        }
+
+        const last20Transactions = user.transactions.slice(-20);
+
+        res.status(200).send({ transactions: last20Transactions });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};
+
+exports.getUserWithoutTransactions = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findOne({ userId }, '-transactions -usedCoupons');
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found.' });
+        }
+
+        res.status(200).send({ user });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};
