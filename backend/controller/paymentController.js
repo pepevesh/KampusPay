@@ -43,7 +43,7 @@ exports.webhook= async(req, res) => {
     try{    
         const {payload}= req.body;
         const orderid=payload.payment.entity.order_id;
-        const userId =redisClient.get(orderid);
+        const userId =await redisClient.get(orderid);
         console.log(userId);
         const user = await User.findOne({ userId });
         user.balance += amount;
