@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 // Dynamically import QrReader with ssr option set to false
 const QrReader = dynamic(() => import('react-qr-reader').then((mod) => {
@@ -17,12 +18,13 @@ const QrReader = dynamic(() => import('react-qr-reader').then((mod) => {
 export default function Scanner() {
   const [error, setError] = useState(null)
   const [hasCamera, setHasCamera] = useState(false)
-  const [key, setKey] = useState(0) // Add a key state to force re-render
+  const [key, setKey] = useState(0)
+  const [manualVendorId, setManualVendorId] = useState('')
+  const [isManualEntry, setIsManualEntry] = useState(false)
   const router = useRouter()
   const videoRef = useRef(null);
 
   useEffect(() => {
-    // Check if the browser supports getUserMedia
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(() => {
@@ -50,7 +52,7 @@ export default function Scanner() {
       try {
         const parsedData = JSON.parse(data);
         if (parsedData.vendorId) {
-          router.push(`/pay?vendorId=${parsedData.vendorId}`);
+          router.push(`/payment?vendorId=${parsedData.vendorId}`);
         } else {
           setError('Invalid QR code: No vendor ID found');
         }
@@ -70,6 +72,15 @@ export default function Scanner() {
     setError(null) // Clear any previous errors
   }
 
+  const handleManualSubmit = (e) => {
+    e.preventDefault()
+    if (manualVendorId.trim()) {
+      router.push(`/payment?vendorId=${manualVendorId.trim()}`);
+    } else {
+      setError('Please enter a valid Vendor ID');
+    }
+  }
+
   useEffect(() => {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
@@ -86,38 +97,42 @@ export default function Scanner() {
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Card className="w-full max-w-md bg-gray-800 text-gray-100 border-gray-700">
         <div className="p-4">
-          <h1 className="text-2xl font-bold text-center mb-4">Scan QR Code</h1>
-          <div className="mb-4">
-            {hasCamera ? (
-              <>
-                <div className="text-center text-white mb-2">Camera should open below:</div>
-                <QrReader
-                  key={key}
-                  onResult={(result) => {
-                    if (result) {
-                      console.log('QR code scanned:', result);
-                      handleScan(result.text);
-                    }
-                  }}
-                  constraints={{
-                    facingMode: 'environment'
-                  }}
-                  videoId="qr-video"
-                  videoRef={videoRef}
-                  containerStyle={{ width: '100%' }}
-                  videoStyle={{ width: '100%' }}
-                  onError={(error) => {
-                    console.error('QrReader error:', error);
-                    setError(`QR Scanner error: ${error.message || 'Unknown error'}`);
-                  }}
-                />
-              </>
-            ) : (
-              <div className="text-center text-yellow-500 mb-4">
-                {error || 'Checking camera access...'}
-              </div>
-            )}
-          </div>
+          <h1 className="text-2xl font-bold text-center mb-4">
+            {isManualEntry ? 'Enter Vendor ID' : 'Scan QR Code'}
+          </h1>
+          {!isManualEntry && (
+            <div className="mb-4">
+              {hasCamera ? (
+                <>
+                  <div className="text-center text-white mb-2">Camera should open below:</div>
+                  <QrReader
+                    key={key}
+                    onResult={(result) => {
+                      if (result) {
+                        console.log('QR code scanned:', result);
+                        handleScan(result.text);
+                      }
+                    }}
+                    constraints={{
+                      facingMode: 'environment'
+                    }}
+                    videoId="qr-video"
+                    videoRef={videoRef}
+                    containerStyle={{ width: '100%' }}
+                    videoStyle={{ width: '100%' }}
+                    onError={(error) => {
+                      console.error('QrReader error:', error);
+                      setError(`QR Scanner error: ${error.message || 'Unknown error'}`);
+                    }}
+                  />
+                </>
+              ) : (
+                <div className="text-center text-yellow-500 mb-4">
+                  {error || 'Checking camera access...'}
+                </div>
+              )}
+            </div>
+          )}
           {error && (
             <div className="text-red-500 text-center mb-4">
               {error}
@@ -129,12 +144,38 @@ export default function Scanner() {
               </Button>
             </div>
           )}
-          <Button
-            className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
-            onClick={() => router.push('/pay')}
-          >
-            Enter Vendor ID Manually
-          </Button>
+          {isManualEntry ? (
+            <form onSubmit={handleManualSubmit} className="space-y-4">
+              <Input
+                type="text"
+                placeholder="Enter Vendor ID"
+                value={manualVendorId}
+                onChange={(e) => setManualVendorId(e.target.value)}
+                className="w-full p-2 bg-gray-700 text-white rounded"
+              />
+              <Button
+                type="submit"
+                className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+              >
+                Submit
+              </Button>
+            </form>
+          ) : (
+            <Button
+              className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+              onClick={() => setIsManualEntry(true)}
+            >
+              Enter Vendor ID Manually
+            </Button>
+          )}
+          {isManualEntry && (
+            <Button
+              className="w-full mt-4 py-4 text-lg bg-gray-600 hover:bg-gray-700 rounded-lg"
+              onClick={() => setIsManualEntry(false)}
+            >
+              Back to QR Scanner
+            </Button>
+          )}
         </div>
       </Card>
     </div>

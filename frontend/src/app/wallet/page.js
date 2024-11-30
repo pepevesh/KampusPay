@@ -54,7 +54,7 @@ export default function Wallet() {
     <div className="min-h-screen bg-gray-900 pb-20">
       <div className="p-4">
         <h1 className="text-2xl font-bold text-white mb-4">Wallet</h1>
-
+        
         {/* Balance Card */}
         <Card className="w-full bg-[#7F3DFF] p-6 mb-6 rounded-2xl">
           <div className="bg-black rounded-xl p-6 text-white">
@@ -64,8 +64,8 @@ export default function Wallet() {
               <span className="text-2xl">₹</span>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <Button onClick={handleOpenModal} className="bg-[#7F3DFF] hover:bg-[#7F3DFF]/90 text-white py-6">
-                Add
+            <Button onClick={handleOpenModal} className="bg-[#7F3DFF] hover:bg-[#7F3DFF]/90 text-white py-6">
+            Add
               </Button>
               <Button className="bg-[#7F3DFF] hover:bg-[#7F3DFF]/90 text-white py-6">
                 Withdraw
@@ -106,8 +106,8 @@ export default function Wallet() {
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
+    {/* Modal */}
+    {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <Card className="w-full max-w-md p-6 bg-white dark:bg-gray-800">
             <div className="flex justify-between items-center mb-6">
