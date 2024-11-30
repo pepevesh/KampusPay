@@ -34,7 +34,7 @@ const Navbar = () => {
             
             <div className="flex justify-between w-1/2 max-w-[140px] relative">
               <Link 
-                href="/"
+                href="/scan"
                 className={`flex flex-col items-center gap-1 ${
                   active === 'scan' ? 'text-[#7F3DFF]' : 'text-gray-400'
                 } relative left-[-15px]`}
@@ -45,7 +45,7 @@ const Navbar = () => {
               </Link>
               
               <Link 
-                href="/"
+                href="/wallet"
                 className={`flex flex-col items-center gap-1 ${
                   active === 'wallet' ? 'text-[#7F3DFF]' : 'text-gray-400'
                 } relative right-[-8px]`}
@@ -70,7 +70,7 @@ const Navbar = () => {
 
           {/* Center Image */}
           <Link 
-            href="/"
+            href="/pay"
             className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center h-14 w-14 rounded-full bg-[#7F3DFF] overflow-hidden shadow-lg z-10"
             aria-label="Main action"
             onClick={() => setActive('action')}
