@@ -20,6 +20,7 @@ connectRedis();
 
 
 app.use('/api/auth',require('./routes/auth'));
+app.use('/api/user',require('./routes/userRoutes'));
 
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URL)
