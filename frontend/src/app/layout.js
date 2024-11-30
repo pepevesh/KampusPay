@@ -20,8 +20,6 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const noNavbarPaths = ['/login', '/register', '/'];
-  const shouldRenderNavbar = !noNavbarPaths.includes('');
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
