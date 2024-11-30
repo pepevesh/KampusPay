@@ -30,7 +30,9 @@ export default function Home() {
             <Link href={"/register"}>
             <Button variant="outline" className="bg-gray-700 hover:bg-[#7F3DFF] border-gray-500 text-md md:text-2xl md:p-6">Sign Up</Button>
             </Link>
+            <Link href={"/login"}>
             <Button variant="outline" className="bg-[#7F3DFF] hover:bg-[#7F3DFF]/75 border-gray-500 text-md  md:text-2xl md:p-6">Login</Button>
+            </Link>
           </div>
         </div>
       </main>
