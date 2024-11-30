@@ -9,7 +9,7 @@ import Link from "next/link"
 
 export default function RegisterForm() {
   return (
-    (<div className="flex items-center justify-center min-h-screen bg-gray-900 ">
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Card className="w-full bg-gray-800 text-gray-100 border-gray-700 max-w-[350px] md:max-w-md">
         <CardHeader>
           <CardTitle
@@ -27,24 +27,27 @@ export default function RegisterForm() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstname" className="text-gray-300">First name</Label>
-                <Input
-                  id="firstname"
-                  placeholder="John"
-                  required
-                  className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastname" className="text-gray-300">Last name</Label>
-                <Input
-                  id="lastname"
-                  placeholder="Doe"
-                  required
-                  className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
-              </div>
+            {/* ID (Roll No) */}
+            <div className="space-y-2">
+              <Label htmlFor="id" className="text-gray-300">ID (Roll no)</Label>
+              <Input
+                id="id"
+                placeholder="21BD1A661O"
+                required
+                className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
             </div>
+
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-300">Name</Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                required
+                className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
+            </div>
+
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-300">Email</Label>
               <Input
@@ -54,6 +57,8 @@ export default function RegisterForm() {
                 required
                 className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
             </div>
+
+            {/* Password */}
             <div className="space-y-2">
               <Label htmlFor="password" className="text-gray-300">Password</Label>
               <Input
@@ -62,29 +67,36 @@ export default function RegisterForm() {
                 required
                 className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
             </div>
+
+            {/* Pin */}
             <div className="space-y-2">
-              <Label htmlFor="confirm-password" className="text-gray-300">Confirm password</Label>
+              <Label htmlFor="pin" className="text-gray-300">Pin</Label>
               <Input
-                id="confirm-password"
+                id="pin"
                 type="password"
+                placeholder="****"
+                maxLength={4}
                 required
                 className="bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-[#7F3DFF] focus:ring-[#7F3DFF]" />
             </div>
+
+            {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-[#7F3DFF] hover:bg-[#6A2FD9] text-white">
+              className="w-full bg-[#7F3DFF] hover:bg-[#6A2FD9] text-white ">
               Register
             </Button>
+
+            {/* Sign In Link */}
             <p className="text-sm text-center text-gray-400">
               Already have an account?{" "}
-              <Link href="/signin" className="text-[#7F3DFF] hover:underline">
-                Sign in
+              <Link href="/login" className="text-[#7F3DFF] hover:underline">
+                Login
               </Link>
             </p>
           </form>
         </CardContent>
       </Card>
-    </div>)
+    </div>
   );
 }
-
