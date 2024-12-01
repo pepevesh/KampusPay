@@ -9,9 +9,10 @@ const getCategoryWiseTransactions = async (req, res) => {
         const categorySplit = await Transaction.aggregate([
             {
                 $match: {
-                    $or: [
-                        { sender: new mongoose.Types.ObjectId(userId) },
-                    ]
+
+                    sender: new mongoose.Types.ObjectId(userId) ,
+                    category: { $ne: "Wallet Top-up" }, // Exclude wallet top-ups
+
                 }
             },
             {

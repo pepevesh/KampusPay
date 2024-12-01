@@ -83,43 +83,65 @@ export default function Wallet() {
 
         {/* Transactions */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">Today</h2>
-          <div className="space-y-4">
-            {transactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between bg-gray-800 p-4 rounded-xl transition-all duration-300 hover:bg-gray-700"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${
-                    transaction.sender.userId !== user.userId ? 'bg-green-500/20' : 'bg-red-500/20'
-                  }`}>
-                    {getTransactionIcon(transaction.type)}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-medium">{transaction.title}</h3>
-                    <p className="text-gray-400 text-sm">{transaction.description}</p>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end">
-                  <p className={`text-lg font-semibold ${
-                    transaction.sender.userId !== user.userId ? 'text-green-500' : 'text-red-500'
-                  }`}>
-                    {transaction.sender.userId !== user.userId ? '+' : '-'} {transaction.amount}₹
-                  </p>
-                  <p className="text-gray-400 text-sm">{transaction.time}</p>
-                  {transaction.sender.userId !== user.userId && (
-                    <p className="text-gray-400 text-xs mt-1">From: {transaction.sender.userId}</p>
-                  )}
-                  {transaction.sender.userId === user.userId && (
-                    <p className="text-gray-400 text-xs mt-1">To: {transaction.receiver.userId}</p>
-                  )}
-                </div>
-              </div>
-            ))}
+  <h2 className="text-xl font-semibold text-white">Today</h2>
+  <div className="space-y-4">
+    {transactions
+      .slice() // Create a shallow copy to avoid mutating the original array
+      .reverse() // Reverse the array order
+      .map((transaction) => (
+        <div
+          key={transaction.id}
+          className="flex items-center justify-between bg-gray-800 p-4 rounded-xl transition-all duration-300 hover:bg-gray-700"
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={`p-3 rounded-xl ${
+                transaction.sender.userId !== user.userId
+                  ? 'bg-green-500/20'
+                  : 'bg-red-500/20'
+              }`}
+            >
+              {getTransactionIcon(transaction.type)}
+            </div>
+            <div>
+              <h3 className="text-white font-medium">{transaction.title}</h3>
+              <p className="text-gray-400 text-sm">{transaction.description}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end">
+            <p
+              className={`text-lg font-semibold ${
+                transaction.sender.userId !== user.userId ||
+                transaction.sender.userId === transaction.receiver.userId
+                  ? 'text-green-500'
+                  : 'text-red-500'
+              }`}
+            >
+              {transaction.sender.userId === transaction.receiver.userId
+                ? '+'
+                : transaction.sender.userId !== user.userId
+                ? '+'
+                : '-'}{' '}
+              {transaction.amount}₹
+            </p>
+            <p className="text-gray-400 text-sm">{transaction.time}</p>
+            {transaction.sender.userId !== user.userId && (
+              <p className="text-gray-400 text-xs mt-1">
+                From: {transaction.sender.userId}
+              </p>
+            )}
+            {transaction.sender.userId === user.userId && (
+              <p className="text-gray-400 text-xs mt-1">
+                To: {transaction.receiver.userId}
+              </p>
+            )}
           </div>
         </div>
+      ))}
+  </div>
+</div>
+
       </div>
 
       {/* Modal */}

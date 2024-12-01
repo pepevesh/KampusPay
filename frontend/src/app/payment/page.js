@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Utensils, X, ArrowLeft } from 'lucide-react'
+import { Utensils, X, ArrowLeft, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import axios from 'axios'
@@ -17,76 +17,88 @@ export default function Payment() {
   const [error, setError] = useState("")
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, token } = useAuth()
+  const { user, token, updateUserFields } = useAuth()
 
   useEffect(() => {
-    const id = searchParams.get('vendorId')
+    const id = searchParams.get('vendorId');
     if (id) {
-      setVendorId(id)
+      setVendorId(id);
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleNumberClick = (num) => {
     if (inputAmount.length < 8) {
-      const newAmount = inputAmount + num
-      setInputAmount(newAmount)
-      setAmount((parseFloat(newAmount) / 100).toFixed(2))
+      const newAmount = inputAmount + num;
+      setInputAmount(newAmount);
+      setAmount((parseFloat(newAmount) / 100).toFixed(2));
     }
-  }
+  };
 
   const handleDelete = () => {
     if (inputAmount.length > 0) {
-      const newAmount = inputAmount.slice(0, -1)
-      setInputAmount(newAmount)
-      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00")
+      const newAmount = inputAmount.slice(0, -1);
+      setInputAmount(newAmount);
+      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00");
     }
-  }
+  };
 
-  const handlePayment = () => {
-    setIsPinModalOpen(true)
-  }
-
+  // New PIN handlers
   const handlePinNumberClick = (num) => {
     if (pin.length < 4) {
-      setPin(pin + num)
+      setPin(prevPin => prevPin + num);
+      setError(""); // Clear any previous errors
     }
-  }
+  };
 
   const handlePinDelete = () => {
-    setPin(pin.slice(0, -1))
-  }
+    if (pin.length > 0) {
+      setPin(prevPin => prevPin.slice(0, -1));
+    }
+  };
+
+  const handlePayment = () => {
+    setIsPinModalOpen(true);
+  };
 
   const handlePinSubmit = async () => {
+    if (pin.length !== 4) {
+      setError("Please enter a 4-digit PIN");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/transaction/createTransaction`,
         {
           senderId: user.userId,
           receiverId: vendorId,
-          amount: parseInt(amount),
-          category: 'events',
-          pin: pin
+          amount: parseFloat(amount),
+          category: 'food',
+          pin,
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
-      )
+      );
 
       if (response.status === 200) {
-        router.push('/wallet')
+        const updatedBalance = user.balance - parseFloat(amount);
+        // Note: updateUserFields needs to be defined or imported from AuthContext
+        updateUserFields({ balance: updatedBalance });
+        router.push('/wallet');
       } else {
-        setError('Transaction failed. Please try again.')
+        setError('Transaction failed. Please try again.');
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('An error occurred. Please try again.');
     } finally {
-      setIsPinModalOpen(false)
-      setPin("")
+      setIsPinModalOpen(false);
+      setPin('');
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -167,7 +179,7 @@ export default function Payment() {
                       <div
                         key={index}
                         className={`w-4 h-4 rounded-full ${
-                          pin.length > index ? 'bg-indigo-500' : 'bg-gray-500'
+                          pin.length > index ? "bg-indigo-500" : "bg-gray-500"
                         }`}
                       ></div>
                     ))}

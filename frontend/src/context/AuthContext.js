@@ -70,6 +70,13 @@ const AuthProviderWithRouter = ({ children }) => {
     }
   };
 
+  const updateUserFields = (updates) => {
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...updates,
+    }));
+  };
+
   useEffect(() => {
     const initializeAuth = async () => {
       const storedAccessToken = localStorage.getItem('accessToken');
@@ -105,7 +112,7 @@ const AuthProviderWithRouter = ({ children }) => {
   }, [router, pathname]);
 
   return (
-    <AuthContext.Provider value={{ token: accessToken, user, isAuthenticated: !!accessToken, login, logout }}>
+    <AuthContext.Provider value={{ token: accessToken, user, isAuthenticated: !!accessToken, login, logout, updateUserFields }}>
       {children}
     </AuthContext.Provider>
   );

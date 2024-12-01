@@ -1,12 +1,46 @@
 'use client'
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatsCard } from "@/components/stats-card"
 import { SpendingChart } from "@/components/spending-chart"
 import { SpendingDonut } from "@/components/spending-donut"
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext"
 
 export default function Dashboard() {
-  const {user}= useAuth();
+  const { user, token } = useAuth();
+  const [dailySpending, setDailySpending] = useState(0);
+
+  useEffect(() => {
+    // Fetch the daily spending data
+    const fetchDailySpending = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user?.id}/daily-spending`,
+          {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch daily spending");
+        }
+
+        const data = await response.json();
+        setDailySpending(data.totalSpent);
+      } catch (error) {
+        console.error("Error fetching daily spending:", error);
+      }
+    };
+
+    if (user?.userId) {
+      fetchDailySpending();
+    }
+  }, [user, token]);
 
   return (
     <div className="flex min-h-screen bg-gray-900 mb-16">
@@ -19,12 +53,12 @@ export default function Dashboard() {
           />
           <StatsCard
             title="Daily Limit"
-            value={user?.dailyLimit}
+            value={`₹${dailySpending}/${user?.dailyLimit}`}
             subtitle="Today's spending limit"
             className="bg-gray-800 text-white border-gray-700"
           />
         </div>
-        
+
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="bg-gray-800 text-white border-gray-700">
             <CardHeader>
@@ -74,8 +108,20 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Daily Spending Section */}
+        {/* <Card className="bg-gray-800 text-white border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Today's Spending</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <div className="text-2xl font-bold">₹{dailySpending}</div>
+              <div className="text-xs text-muted-foreground">Total Spent Today</div>
+            </div>
+          </CardContent>
+        </Card> */}
       </div>
     </div>
-  )
+  );
 }
-

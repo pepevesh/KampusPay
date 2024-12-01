@@ -130,7 +130,7 @@ export default function Scanner() {
             <div id="reader" className="w-full"></div>
             {error && (
               <div className="text-red-500 text-center mt-4">
-                {error}
+                {/* {error} */}
                 <Button
                   className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
                   onClick={startScanner}

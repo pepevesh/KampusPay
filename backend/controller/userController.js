@@ -204,6 +204,7 @@ exports.getDailySpending = async (req, res) => {
       {
         $match: {
           sender: new mongoose.Types.ObjectId(userId),
+          category: { $ne: "Wallet Top-up" }, // Exclude wallet top-ups
           time: { $gte: todayInUTC, $lt: tomorrow }
         }
       },

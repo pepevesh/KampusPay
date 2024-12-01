@@ -9,7 +9,7 @@ const RazorpayPayment = ({ onClose }) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("INR");
   const [loading, setLoading] = useState(false);
-  const {user} = useAuth();
+  const {user,token} = useAuth();
 
   const loadRazorpayScript = () =>
     new Promise((resolve) => {
@@ -42,6 +42,7 @@ const RazorpayPayment = ({ onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ userId:id,amount }),
       });
