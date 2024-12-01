@@ -56,7 +56,7 @@ export default function Scanner() {
         } else {
           setError('Invalid QR code: No vendor ID found');
         }
-      } catch (e) {
+      } catch {
         setError('Invalid QR code format');
       }
     }
@@ -73,13 +73,13 @@ export default function Scanner() {
   }
 
   const handleManualSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (manualVendorId.trim()) {
-      router.push(`/payment?vendorId=${manualVendorId.trim()}`);
+      router.push(`/pay?vendorId=${manualVendorId.trim()}`);
     } else {
       setError('Please enter a valid Vendor ID');
     }
-  }
+  };
 
   useEffect(() => {
     if (videoRef.current) {

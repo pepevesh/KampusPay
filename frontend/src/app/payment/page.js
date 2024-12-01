@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { Utensils, X } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Utensils, X, ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
@@ -11,6 +11,7 @@ export default function Payment() {
   const [inputAmount, setInputAmount] = useState("")
   const [vendorId, setVendorId] = useState("")
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   useEffect(() => {
     const id = searchParams.get('vendorId')
@@ -41,12 +42,20 @@ export default function Payment() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <Card className="w-full bg-gray-800 text-gray-100 border-gray-700 max-w-[350px] md:max-w-md  -mt-20">
+      <Card className="w-full bg-gray-800 text-gray-100 border-gray-700 max-w-[350px] md:max-w-md -mt-20">
         <div className="p-4 flex flex-col h-[75vh]">
+          <Button
+            variant="ghost"
+            className="self-start mb-4"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
           <div className="text-center mb-4">
             <h1 className="text-2xl mb-2">Payment</h1>
             <p className="text-sm text-gray-400">Vendor ID: {vendorId || 'Not specified'}</p>
           </div>
+
 
           <div className="flex justify-center mb-4">
             <div className="bg-black rounded-full p-4">

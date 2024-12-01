@@ -72,7 +72,7 @@ const Navbar = () => {
 
           {/* Center Image */}
           <Link 
-            href="/"
+            href="/pay"
             className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center h-14 w-14 rounded-full bg-[#7F3DFF] overflow-hidden shadow-lg z-10"
             aria-label="Main action"
             onClick={() => setActive('action')}
