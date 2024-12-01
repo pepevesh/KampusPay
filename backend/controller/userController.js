@@ -246,56 +246,60 @@ exports.getDailySpending = async (req, res) => {
 exports.getWeeklySpending = async (req, res) => {
     const { userId } = req.params;
     console.log('User ID:', userId);
-  
+
     try {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: 'Invalid user ID format' });
-      }
-  
-      // Get the current date and start of the week (Sunday)
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      
-      // Calculate the start of the week (Sunday)
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - dayOfWeek);  // Set to Sunday of the current week
-      startOfWeek.setHours(0, 0, 0, 0);  // Start of day in IST (local time)
-      
-      // Adjust startOfWeek to UTC
-      const offset = startOfWeek.getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
-      const startOfWeekInUTC = new Date(startOfWeek.getTime() - offset); // Convert to UTC
-  
-      // Calculate the end of the week (next Sunday)
-      const endOfWeek = new Date(startOfWeekInUTC);
-      endOfWeek.setDate(startOfWeekInUTC.getDate() + 7); // Add 7 days to get to next Sunday
-      endOfWeek.setHours(23, 59, 59, 999); // End of the day (next Sunday in UTC)
-  
-      const result = await Transaction.aggregate([
-        {
-          $match: {
-            sender: new mongoose.Types.ObjectId(userId),
-            category: { $ne: "Wallet Top-up" }, // Exclude wallet top-ups
-            time: { $gte: startOfWeekInUTC, $lt: endOfWeek }  // Transactions between start and end of the week
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            totalSpent: { $sum: "$amount" }
-          }
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID format' });
         }
-      ]);
-  
-      console.log('Weekly Spending Aggregation result:', result);
-  
-      const totalSpent = result.length > 0 ? result[0].totalSpent : 0;
-      res.status(200).json({ totalSpent });
-  
+
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - 6);
+        startDate.setHours(0, 0, 0, 0);
+
+        const offset = today.getTimezoneOffset() * 60000;
+        const startDateInUTC = new Date(startDate.getTime() - offset);
+        const endDateInUTC = new Date(today.getTime() - offset);
+
+        const result = await Transaction.aggregate([
+            {
+                $match: {
+                    sender: new mongoose.Types.ObjectId(userId),
+                    category: { $ne: "Wallet Top-up" },
+                    time: { $gte: startDateInUTC, $lt: endDateInUTC }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$time" } },
+                    totalSpent: { $sum: "$amount" }
+                }
+            },
+            {
+                $sort: { _id: 1 } // Sort by date
+            }
+        ]);
+
+        const spendingByDay = Array(7).fill(0);
+        const startOfWeek = new Date(startDateInUTC);
+
+        result.forEach(({ _id, totalSpent }) => {
+            const dayIndex = Math.round(
+                (new Date(_id).getTime() - startOfWeek.getTime()) / (24 * 60 * 60 * 1000)
+            );
+            spendingByDay[dayIndex] = totalSpent;
+        });
+
+        res.status(200).json({ spendingByDay });
     } catch (error) {
-      console.error('Error fetching weekly spending:', error);
-      res.status(500).json({ message: 'Error fetching weekly spending', error: error.message || error });
+        console.error('Error fetching weekly spending:', error);
+        res.status(500).json({ message: 'Error fetching weekly spending', error: error.message || error });
     }
-  };
+};
+
+  
   
 
 exports.updateLimit = async (req, res) => {
