@@ -2,10 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const connectDB = require("./config/mbdatabase");
 const cors=require('cors');
-const {hashPassword} = require('./utils/passwordUtils');
 const cookieParser = require('cookie-parser');
-const User = require('./model/User');
 const {connectRedis} = require("./config/redisdatabase");
+require('./cronJobs');
 
 const app = express();
 require('dotenv').config();
