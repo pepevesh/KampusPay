@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Html5Qrcode } from "html5-qrcode"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,8 @@ export default function Scanner() {
   const [html5QrCode, setHtml5QrCode] = useState(null)
   const [manualVendorId, setManualVendorId] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const userId = searchParams.get('userId')
 
   useEffect(() => {
     const scanner = new Html5Qrcode("reader")
@@ -21,7 +23,7 @@ export default function Scanner() {
 
     return () => {
       if (scanner && scanning) {
-        scanner.stop().catch(console.error)
+        scanner.stop().catch((err) => console.error('Error stopping scanner:', err))
       }
     }
   }, [])
@@ -33,22 +35,37 @@ export default function Scanner() {
       setError(null)
       setScanning(true)
 
+      const hasPermission = await navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(() => true)
+        .catch(() => false)
+
+      if (!hasPermission) {
+        setError('Camera permission is required')
+        return
+      }
+
       await html5QrCode.start(
         { facingMode: "environment" },
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
+          fps: 15,
+          qrbox: { width: 300, height: 300 },
         },
         async (decodedText) => {
           try {
-            const parsedData = JSON.parse(decodedText)
-            if (parsedData.encryptedqr) {
+            const jsontext = { encryptedqr: decodedText }
+            console.log(jsontext)
+
+            if (jsontext.encryptedqr) {
               html5QrCode.stop().catch(console.error)
-              // Use axios to send the encrypted QR to the backend to decrypt
               try {
-                const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/qr/decryptqr', { encryptedqr: parsedData.encryptedqr })
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/qr/decrypt`, { encryptedqr: jsontext.encryptedqr })
+                console.log(response)
+
                 if (response.data.userId) {
-                  router.push(`/payment?userId=${response.data.userId}&vendorId=${parsedData.vendorId}`)
+                  // Include both userId from QR and from URL params if they exist
+                  const paymentUserId = userId || response.data.userId
+                  router.push(`/payment?userId=${paymentUserId}&scannedUserId=${response.data.userId}`)
                 } else {
                   setError('Failed to decrypt QR code or no user ID found')
                 }
@@ -65,6 +82,7 @@ export default function Scanner() {
         },
         (errorMessage) => {
           console.log(errorMessage)
+          setError('Error scanning QR code: ' + errorMessage)
         }
       )
     } catch (err) {
@@ -94,7 +112,13 @@ export default function Scanner() {
 
   const handleManualEntry = () => {
     if (manualVendorId.trim()) {
-      router.push(`/payment?vendorId=${manualVendorId.trim()}`)
+      // Include userId in the manual entry navigation if it exists
+      const queryParams = new URLSearchParams()
+      queryParams.append('vendorId', manualVendorId.trim())
+      if (userId) {
+        queryParams.append('userId', userId)
+      }
+      router.push(`/payment?${queryParams.toString()}`)
     } else {
       setError('Please enter a valid Vendor ID')
     }
@@ -105,7 +129,7 @@ export default function Scanner() {
       <Card className="w-full max-w-md bg-gray-800 text-gray-100 border-gray-700">
         <div className="p-4">
           <h1 className="text-2xl font-bold text-center mb-4">Scan QR Code</h1>
-          
+
           <div className="mb-4">
             <div id="reader" className="w-full"></div>
             {error && (
