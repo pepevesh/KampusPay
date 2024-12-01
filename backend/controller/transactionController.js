@@ -2,17 +2,23 @@ const mongoose = require('mongoose');
 const User = require('../model/User');
 const Transaction = require('../model/Transaction');
 const Coupon = require('../model/Coupon');
+const bcrypt = require('bcrypt');
+const {comparePassword,hashPassword} = require('../utils/passwordUtils');
 
 exports.createTransaction = async (req, res) => {
-    const { senderId, receiverId, amount, category, couponId } = req.body;
+    const { senderId, receiverId, amount, category, couponId, pin } = req.body;
 
+    const user = await User.findOne({userId: senderId});
+    const isPinValid = await bcrypt.compare(pin.toString(), user.pin);
+    if (!isPinValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+    }
     const session = await mongoose.startSession();
     session.startTransaction();
     sendAmount = amount;
 
     try {
         if(couponId){
-            const user = await User.findOne({userId: senderId});
             const isCouponUsed = user.usedCoupons.includes(couponId);
 
             if(isCouponUsed){
