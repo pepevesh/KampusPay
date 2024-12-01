@@ -1,91 +1,99 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { useAuth } from "@/context/AuthContext"
+import { useState, useEffect } from "react";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { useAuth } from "@/context/AuthContext";
 
 export function SpendingChart() {
-  const [weeklyData, setWeeklyData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const { user, token } = useAuth()
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { user, token } = useAuth();
 
   useEffect(() => {
     const fetchWeeklySpending = async () => {
-      if (!user?.id || !token) return
+      if (!user?.id || !token) {
+        setError("User not authenticated");
+        setIsLoading(false);
+        return;
+      }
 
-      setIsLoading(true)
-      setError(null)
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        setError("API URL is not configured");
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/daily-spending`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/weekly-spending`,
           {
             method: "GET",
             headers: {
-              "Authorization": `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
-        )
+        );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch weekly spending")
+          const { message } = await response.json();
+          throw new Error(message || "Failed to fetch weekly spending");
         }
-        console.log(response);
 
-        const data = await response.json()
-        setWeeklyData(data.weeklySpending)
+        const { spendingByDay } = await response.json();
+
+        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const currentDayIndex = new Date().getDay();
+        const chartData = spendingByDay.map((spending, index) => ({
+          name: index === 6 ? "Today" : daysOfWeek[(currentDayIndex + 7 - 6 + index) % 7],
+          spending,
+          isToday: index === 6, // Flag for the "Today" bar
+        }));
+
+        setWeeklyData(chartData);
       } catch (error) {
-        console.error("Error fetching weekly spending:", error)
-        setError("Failed to fetch spending data. Please try again later.")
+        setError(error.message || "An error occurred while fetching data");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchWeeklySpending()
-  }, [user?.id, token])
+    fetchWeeklySpending();
+  }, [user, token]);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-[240px]">Loading...</div>
+    return <p className="text-gray-500 text-center">Loading weekly spending...</p>;
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-[240px] text-red-500">{error}</div>
+    return <p className="text-red-500 text-center">Error: {error}</p>;
   }
 
   return (
-    <div className="pt-2">
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="w-full h-64">
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={weeklyData}>
-          <XAxis
-            dataKey="name"
-            stroke="#888888"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            stroke="#888888"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `₹${value}`}
-          />
-          <Tooltip
-            contentStyle={{ background: "#333", border: "none" }}
-            itemStyle={{ color: "#fff" }}
-            formatter={(value) => [`₹${value}`, "Spending"]}
-          />
+          <XAxis dataKey="name" tick={{ fill: "#4A5568" }} />
+          <YAxis tick={{ fill: "#4A5568" }} />
+          <Tooltip formatter={(value) => [`$${value}`, "Spending"]} />
           <Bar
             dataKey="spending"
-            fill="#7F3DFF"
-            radius={[4, 4, 0, 0]}
+            shape={(props) => {
+              const { x, y, width, height, payload } = props;
+              const color = payload.isToday
+                ? "#3182CE" // Blue for "Today"
+                : payload.spending > (user?.dailyLimit || Infinity)
+                ? "#E53E3E" // Red if spending exceeds the limit
+                : "#38A169"; // Green otherwise
+              return <rect x={x} y={y} width={width} height={height} fill={color} />;
+            }}
           />
         </BarChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
-
