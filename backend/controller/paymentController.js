@@ -61,6 +61,7 @@ exports.webhook= async(req, res) => {
                 category: "Wallet Top-up",
                 date: new Date(),
             });
+            user.transactions.push(transaction);
             await user.save();
             await transaction.save();
             redisClient.del(orderid);
