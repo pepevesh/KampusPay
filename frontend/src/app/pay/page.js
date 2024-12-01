@@ -33,13 +33,15 @@ const vendors = [
   },
 ];
 
-export default function VendorsPage() {
+export default function VendorsPage({ userId }) {
   const router = useRouter();
 
   const handleVendorSelect = (vendorId) => {
-    if (vendorId === 'others1') {
-      router.push(`/scan`);
+    if (vendorId === 'others1' && userId) {
+      // If userId exists, navigate to scan page with userId
+      router.push(`/scan?userId=${userId}`);
     } else {
+      // Otherwise navigate to payment page with vendorId
       router.push(`/payment?vendorId=${vendorId}`);
     }
   };

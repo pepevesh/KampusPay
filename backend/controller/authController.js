@@ -40,6 +40,7 @@ const login = async (req, res) => {
             balance: person.balance,
             dailyLimit: person.dailyLimit,
             availability: person?.availability,
+            qrcode:person?.qrcode
 
         };
 
@@ -96,7 +97,8 @@ const validateToken = (req, res) => {
                 email: decoded.email,
                 balance: decoded.balance,
                 dailyLimit: decoded.dailyLimit,
-                availability: decoded?.availability
+                availability: decoded?.availability,
+                qrcode: decoded?.qrcode,
             };
             res.status(200).json({ valid: true, user });
         });
@@ -154,6 +156,7 @@ const refreshAccessToken = async (req, res) => {
             balance: person.balance,
             dailyLimit: person.dailyLimit,
             availability: person?.availability,
+            qrcode: decoded?.qrcode,
         };
 
         // Generate a new access token

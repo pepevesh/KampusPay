@@ -5,6 +5,7 @@ const { redisClient} = require('../config/redisdatabase');
 const {sendOTPEmail}= require('../services/OTPservice');
 const { promisify } = require('util');
 require('dotenv').config();
+const { encrypt } = require('../utils/encryptionUtils');
 
 exports.sendOtp = async (req, res) => {
     try {
@@ -54,18 +55,20 @@ exports.createUser = async (req, res) => {
         const usedCoupons = [];
         const balance=0;
         const role="Student";
+        const qrcode =encrypt(userId); 
         // Hash the password and pin before saving
         password = await hashPassword(password);
         pin = await hashPassword(pin);
 
         const newUser = new User({
-            userId, name, role, email, password, balance, pin, dailyLimit, transactions, usedCoupons
+            userId, name, role, email, password, balance, pin, dailyLimit, transactions, usedCoupons, qrcode
         });
 
         await newUser.save();
         res.status(200).json({ success: true, message: "User created successfully" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+        console.log(error)
     }
 };
 

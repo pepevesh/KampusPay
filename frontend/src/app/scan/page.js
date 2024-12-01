@@ -6,6 +6,7 @@ import { Html5Qrcode } from "html5-qrcode"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import axios from 'axios'
 
 export default function Scanner() {
   const [error, setError] = useState(null)
@@ -15,11 +16,9 @@ export default function Scanner() {
   const router = useRouter()
 
   useEffect(() => {
-    // Initialize scanner instance
     const scanner = new Html5Qrcode("reader")
     setHtml5QrCode(scanner)
 
-    // Cleanup on component unmount
     return () => {
       if (scanner && scanning) {
         scanner.stop().catch(console.error)
@@ -40,28 +39,35 @@ export default function Scanner() {
           fps: 10,
           qrbox: { width: 250, height: 250 },
         },
-        (decodedText) => {
-          // Success callback
+        async (decodedText) => {
           try {
             const parsedData = JSON.parse(decodedText)
-            console.log(decodedText)
-            if (parsedData.vendorId) {
+            if (parsedData.encryptedqr) {
               html5QrCode.stop().catch(console.error)
-              router.push(`/payment?vendorId=${parsedData.vendorId}`)
+              // Use axios to send the encrypted QR to the backend to decrypt
+              try {
+                const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/qr/decryptqr', { encryptedqr: parsedData.encryptedqr })
+                if (response.data.userId) {
+                  router.push(`/payment?userId=${response.data.userId}&vendorId=${parsedData.vendorId}`)
+                } else {
+                  setError('Failed to decrypt QR code or no user ID found')
+                }
+              } catch (err) {
+                setError('Error decrypting QR code with the backend')
+                console.error('Axios error:', err)
+              }
             } else {
-              setError('Invalid QR code: No vendor ID found')
+              setError('Invalid QR code format')
             }
           } catch (e) {
-            setError('Invalid QR code format')
+            setError('Error processing QR code')
           }
         },
         (errorMessage) => {
-          // Error callback
           console.log(errorMessage)
         }
       )
     } catch (err) {
-      console.error('Scanner error:', err)
       setError(`Camera access error: ${err.message || 'Unknown error'}`)
       setScanning(false)
     }
@@ -79,10 +85,8 @@ export default function Scanner() {
   }
 
   useEffect(() => {
-    // Start scanner when component mounts
     startScanner()
-    
-    // Cleanup on unmount
+
     return () => {
       stopScanner()
     }
@@ -137,4 +141,3 @@ export default function Scanner() {
     </div>
   )
 }
-

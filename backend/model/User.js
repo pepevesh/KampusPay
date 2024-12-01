@@ -52,6 +52,9 @@ const userSchema = new mongoose.Schema({
     ],
     notification: {
         type: String,
+    },
+    qrcode:{
+        type: String, 
     }
 });
 

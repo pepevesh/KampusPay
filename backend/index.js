@@ -26,7 +26,7 @@ app.use('/api/transaction',require('./routes/transactionRoutes'));
 app.use('/api/category',require('./routes/categoryRoutes'));
 app.use('/api/payment',require('./routes/paymentRoutes'));
 app.use('/api/payout',require('./routes/payoutRoutes'));
-
+app.use('/api/qr',require('./routes/qrRoutes'));
 // Connect to MongoDB and start server
 mongoose.connect(process.env.MONGO_URL)
     .then(() => {
