@@ -48,7 +48,9 @@ exports.webhook= async(req, res) => {
         const userId =await redisClient.get(orderid);
         console.log(userId);
         const user = await User.findOne({ userId });
+        console.log(amount);
         user.balance += amount;
+        console.log(user.balance);
         // Create and save the transaction
         const transaction = new Transaction({
             sender: user,
