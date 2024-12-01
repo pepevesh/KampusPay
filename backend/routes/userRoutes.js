@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/createUser', createUser);
 router.post('/userotp', sendOtp);
 router.post('/verifyuserotp', verifyOtp);
-router.post('/getUserTransactions', getUserTransactions);
+router.post('/getUserTransactions',authMiddleware(["Student"]), getUserTransactions);
 router.post('/getUserWithoutTransactions', getUserWithoutTransactions);
 router.post('/updateLimit', updateLimit);
 router.post('/update-password', updatePassword);

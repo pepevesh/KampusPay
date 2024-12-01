@@ -1,10 +1,9 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Utensils, Printer, Megaphone, User, BanIcon as Badminton } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { useRouter } from 'next/navigation';
+import { Utensils, Printer, Megaphone, User, BanIcon as Badminton } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const vendors = [
   {
@@ -32,34 +31,18 @@ const vendors = [
     name: 'Others',
     icon: User,
   },
-]
+];
 
 export default function VendorsPage() {
-  const router = useRouter()
-  const [userId, setUserId] = useState(null)
-
-  useEffect(() => {
-    // Example of setting userId from a parent (could be via props or context)
-    const fetchedUserId = 'user123' // This can come from props or API response
-    if (fetchedUserId) {
-      setUserId(fetchedUserId)
-    }
-  }, [])
+  const router = useRouter();
 
   const handleVendorSelect = (vendorId) => {
-    if (vendorId === 'others1' && userId) {
-      // Navigate to scan page with userId for the Others option
-      router.push(`/scan?userId=${userId}`)
+    if (vendorId === 'others1') {
+      router.push(`/scan`);
     } else {
-      // For other vendors, include userId if it exists
-      const queryParams = new URLSearchParams()
-      queryParams.append('vendorId', vendorId)
-      if (userId) {
-        queryParams.append('userId', userId)
-      }
-      router.push(`/payment?${queryParams.toString()}`)
+      router.push(`/payment?vendorId=${vendorId}`);
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -71,11 +54,7 @@ export default function VendorsPage() {
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             {vendors.map((vendor) => {
-              const Icon = vendor.icon
-              // Show all vendors including 'Others' when userId exists
-              if (!userId && vendor.id === 'others1') {
-                return null
-              }
+              const Icon = vendor.icon;
               return (
                 <Button
                   key={vendor.id}
@@ -88,11 +67,11 @@ export default function VendorsPage() {
                     {vendor.name}
                   </span>
                 </Button>
-              )
+              );
             })}
           </div>
         </div>
       </Card>
     </div>
-  )
+  );
 }

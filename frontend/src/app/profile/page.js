@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const qrData = user?.qrcode;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 ">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 ">
       <Card className="w-full max-w-md bg-white shadow-lg rounded-2xl overflow-hidden md:mb-40">
         <CardHeader className="bg-primary p-6">
           <CardTitle className="text-2xl font-bold text-white">User Profile</CardTitle>
@@ -46,7 +46,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <Label htmlFor="dailyLimit" className="text-sm font-medium text-gray-500">Daily Limit</Label>
-            <div id="dailyLimit" className="text-lg font-semibold text-gray-900">${user?.dailyLimit}</div>
+            <div id="dailyLimit" className="text-lg font-semibold text-gray-900">{user?.dailyLimit}</div>
           </div>
           {showQR && (
             <div className="mt-6 flex flex-col items-center">

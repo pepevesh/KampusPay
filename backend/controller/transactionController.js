@@ -73,7 +73,7 @@ exports.createTransaction = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
-
+        console.log(error);
         res.status(500).send({ error: error.message });
     }
 };

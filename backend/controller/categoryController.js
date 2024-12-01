@@ -3,6 +3,7 @@ const Transaction = require('../model/Transaction');
 
 const getCategoryWiseTransactions = async (req, res) => {
     const { userId } = req.params;
+    console.log(userId);
 
     try {
         const categorySplit = await Transaction.aggregate([
@@ -51,6 +52,7 @@ const getCategoryWiseTransactions = async (req, res) => {
         res.status(200).json(categorySplit);
     } catch (error) {
         res.status(500).json({ message: error.message });
+        console.log(error);
     }
 };
 

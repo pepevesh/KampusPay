@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Utensils, X, ArrowLeft } from 'lucide-react'
+import { Utensils, X, ArrowLeft, LockKeyhole } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import axios from 'axios'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Payment() {
   const [amount, setAmount] = useState("0")
   const [inputAmount, setInputAmount] = useState("")
   const [vendorId, setVendorId] = useState("")
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false)
+  const [pin, setPin] = useState("")
+  const [error, setError] = useState("")
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { user, token } = useAuth()
 
   useEffect(() => {
     const id = searchParams.get('vendorId')
@@ -24,7 +30,7 @@ export default function Payment() {
     if (inputAmount.length < 8) {
       const newAmount = inputAmount + num
       setInputAmount(newAmount)
-      setAmount(newAmount)
+      setAmount((parseFloat(newAmount) / 100).toFixed(2))
     }
   }
 
@@ -37,7 +43,49 @@ export default function Payment() {
   }
 
   const handlePayment = () => {
-    console.log(`Processing payment of ${amount} for vendor ${vendorId}`)
+    setIsPinModalOpen(true)
+  }
+
+  const handlePinNumberClick = (num) => {
+    if (pin.length < 4) {
+      setPin(pin + num)
+    }
+  }
+
+  const handlePinDelete = () => {
+    setPin(pin.slice(0, -1))
+  }
+
+  const handlePinSubmit = async () => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/transaction/createTransaction`,
+        {
+          senderId: user.userId,
+          receiverId: vendorId,
+          amount: parseInt(amount),
+          category: 'events',
+          pin: pin
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (response.status === 200) {
+        router.push('/wallet')
+      } else {
+        setError('Transaction failed. Please try again.')
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setIsPinModalOpen(false)
+      setPin("")
+    }
   }
 
   return (
@@ -55,7 +103,6 @@ export default function Payment() {
             <h1 className="text-2xl mb-2">Payment</h1>
             <p className="text-sm text-gray-400">Vendor ID: {vendorId || 'Not specified'}</p>
           </div>
-
 
           <div className="flex justify-center mb-4">
             <div className="bg-black rounded-full p-4">
@@ -106,6 +153,65 @@ export default function Payment() {
           </Button>
         </div>
       </Card>
+
+      {/* PIN Modal */}
+      {isPinModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-[300px] bg-gray-800 text-gray-100 border-gray-700">
+            <div className="p-4">
+              <h2 className="text-xl mb-4 text-center">Enter PIN</h2>
+              <div className="flex justify-center mb-4">
+                <div className="bg-gray-700 rounded-lg p-2 w-32">
+                  <div className="flex justify-between">
+                    {[1, 2, 3, 4].map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-4 h-4 rounded-full ${
+                          pin.length > index ? 'bg-indigo-500' : 'bg-gray-500'
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <Button
+                    key={num}
+                    variant="ghost"
+                    className="h-12 text-2xl hover:bg-zinc-700"
+                    onClick={() => handlePinNumberClick(num.toString())}
+                  >
+                    {num}
+                  </Button>
+                ))}
+                <Button
+                  variant="ghost"
+                  className="h-12 text-2xl hover:bg-zinc-700 col-start-2"
+                  onClick={() => handlePinNumberClick("0")}
+                >
+                  0
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="h-12 text-2xl hover:bg-zinc-700 col-start-3"
+                  onClick={handlePinDelete}
+                >
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+              <Button
+                className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+                onClick={handlePinSubmit}
+                disabled={pin.length !== 4}
+              >
+                Confirm Payment
+              </Button>
+              {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

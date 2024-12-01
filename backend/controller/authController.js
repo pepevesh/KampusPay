@@ -156,7 +156,7 @@ const refreshAccessToken = async (req, res) => {
             balance: person.balance,
             dailyLimit: person.dailyLimit,
             availability: person?.availability,
-            qrcode: decoded?.qrcode,
+            qrcode: person?.qrcode,
         };
 
         // Generate a new access token
