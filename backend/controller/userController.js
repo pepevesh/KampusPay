@@ -169,13 +169,29 @@ exports.getUserWithoutTransactions = async (req, res) => {
     try {
         const { userId } = req.body;
 
-        const user = await User.findOne({ userId }, '-transactions -usedCoupons');
+        const user = await User.findOne({ userId }, '-transactions');
 
         if (!user) {
             return res.status(404).send({ error: 'User not found.' });
         }
 
-        res.status(200).send({ user });
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};
+
+exports.getUserBalance = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findOne({ userId }, '-transactions');
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found.' });
+        }
+
+        res.status(200).send({balance: user.balance});
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
