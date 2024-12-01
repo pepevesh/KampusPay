@@ -34,9 +34,6 @@ exports.unsubscribe = async (req, res) => {
     res.status(200).json({ message: 'Unsubscribed.' });
 };
   
-// Route to send a push notification
-const webpush = require('web-push');
-const User = require('../models/User'); // Adjust the path based on your project structure
 
 exports.sendNotification = async (message, userId) => {
     try {
