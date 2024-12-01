@@ -65,7 +65,7 @@ export default function Scanner() {
                 if (response.data.userId) {
                   // Include both userId from QR and from URL params if they exist
                   const paymentUserId = userId || response.data.userId
-                  router.push(`/payment?userId=${paymentUserId}&scannedUserId=${response.data.userId}`)
+                  router.push(`/payment?vendorId=${paymentUserId}`)
                 } else {
                   setError('Failed to decrypt QR code or no user ID found')
                 }
@@ -79,10 +79,6 @@ export default function Scanner() {
           } catch (e) {
             setError('Error processing QR code')
           }
-        },
-        (errorMessage) => {
-          console.log(errorMessage)
-          setError('Error scanning QR code: ' + errorMessage)
         }
       )
     } catch (err) {

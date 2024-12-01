@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Utensils, X, ArrowLeft } from 'lucide-react'
+import { User, X, ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
@@ -53,13 +53,13 @@ export default function Payment() {
           </Button>
           <div className="text-center mb-4">
             <h1 className="text-2xl mb-2">Payment</h1>
-            <p className="text-sm text-gray-400">Vendor ID: {vendorId || 'Not specified'}</p>
+            <p className="text-sm text-gray-400">ID: {vendorId || 'Not specified'}</p>
           </div>
 
 
           <div className="flex justify-center mb-4">
             <div className="bg-black rounded-full p-4">
-              <Utensils className="w-12 h-12" />
+              <User className="w-12 h-12" />
             </div>
           </div>
 
