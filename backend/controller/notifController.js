@@ -35,21 +35,38 @@ exports.unsubscribe = async (req, res) => {
 };
   
 // Route to send a push notification
-exports.sendNotification(message) = async (req, res) => {
-    const { message, userId } = req.body;
+const webpush = require('web-push');
+const User = require('../models/User'); // Adjust the path based on your project structure
 
-    const user = await User.findOne({ userId });
+exports.sendNotification = async (message, userId) => {
+    try {
+        // Validate input
+        if (!userId || !message) {
+            throw new Error('UserId and message are required.');
+        }
 
-    if (user.notification) {
+        const user = await User.findOne({ userId });
 
-        webpush.sendNotification(sub, JSON.stringify({
+        if (!user) {
+            throw new Error('User not found.');
+        }
+
+        if (!user.notification) {
+            throw new Error('No subscribers found.');
+        }
+
+        const subscription = user.notification;
+
+        await webpush.sendNotification(subscription, JSON.stringify({
             title: 'New Notification',
             body: message,
-            icon: '/web-app-manifest-192x192.png'
-        })).catch(error => console.error('Error sending notification', error));
+            icon: '/web-app-manifest-192x192.png',
+        }));
 
-        res.status(200).json({ message: 'Notification sent.' });
-    } else {
-        res.status(404).json({ error: 'No subscribers found' });
+        console.log('Notification sent successfully.');
+        return { success: true, message: 'Notification sent.' };
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        return { success: false, error: error.message };
     }
 };
