@@ -56,16 +56,16 @@ export function SpendingDonut() {
   // Function to get color based on category name
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'food':
-        return '#4ade80' // Green
-      case 'xerox':
-        return '#a78bfa' // Purple
-      case 'event':
-        return '#fbbf24' // Yellow
-      case 'others':
-        return '#f43f5e' // Red
+      case 'canteen':
+        return '#4ade80'
+      case 'stationery':
+        return '#a78bfa'
+      case 'recreation':
+        return '#f43f5e'
+      case 'events':
+        return '#fbbf24'
       default:
-        return '#b0b0b0' // Default gray
+        return '#ffffff'
     }
   }
 

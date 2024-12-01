@@ -170,10 +170,6 @@ export default function ProfilePage() {
             <Label htmlFor="name" className="text-sm font-medium text-gray-500">Name</Label>
             <div id="name" className="text-lg font-semibold text-gray-900">{user?.name}</div>
           </div>
-          <div>
-            <Label htmlFor="dailyLimit" className="text-sm font-medium text-gray-500">Daily Limit</Label>
-            <div id="dailyLimit" className="text-lg font-semibold text-gray-900">{user?.dailyLimit}</div>
-          </div>
           {showQR && (
             <div className="mt-6 flex flex-col items-center">
               <div className="bg-white p-4 rounded-lg shadow-md">
