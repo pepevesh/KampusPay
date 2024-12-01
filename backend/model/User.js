@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const Schema = mongoose.Schema;
 const userSchema = new mongoose.Schema({
     userId: {
         type: String,
@@ -50,9 +50,7 @@ const userSchema = new mongoose.Schema({
             type: String,
         }
     ],
-    notification: {
-        type: String,
-    },
+    notification: { type: Schema.Types.Mixed, default: null },
     qrcode:{
         type: String, 
     }

@@ -5,6 +5,6 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/subscribe', authMiddleware(["Student"]), subscribe);
 router.post('/unsubscribe', authMiddleware(["Student"]), unsubscribe);
-router.post('/sendNotification', authMiddleware(["Student"]), sendNotification);
+router.post('/sendNotification',  sendNotification);
 
 module.exports = router;
