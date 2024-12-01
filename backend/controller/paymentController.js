@@ -44,11 +44,11 @@ exports.webhook= async(req, res) => {
     try{    
         const {payload}= req.body;
         const orderid=payload.payment.entity.order_id;
-        const amount=payload.payment.entity.amount;
+        const amount=(payload.payment.entity.amount)/100;
         const userId =await redisClient.get(orderid);
         console.log(userId);
         const user = await User.findOne({ userId });
-        user.balance += (amount/100);
+        user.balance += amount;
         // Create and save the transaction
         const transaction = new Transaction({
             sender: user,
@@ -58,6 +58,7 @@ exports.webhook= async(req, res) => {
             date: new Date(),
         });
         await user.save();
+        await transaction.save();
     }
     catch(error){
         console.error("Error creating Razorpay order:", error);
