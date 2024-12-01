@@ -143,14 +143,20 @@ exports.getUserTransactions = async (req, res) => {
     try {
         const { userId } = req.body;
 
+        // Find the user and populate the transactions along with sender and receiver details
         const user = await User.findOne({ userId }).populate({
             path: 'transactions',
+            populate: [
+                { path: 'sender', select: 'userId name' },
+                { path: 'receiver', select: 'userId name' },
+            ],
         });
 
         if (!user) {
             return res.status(404).send({ error: 'User not found.' });
         }
 
+        // Get the last 20 transactions
         const last20Transactions = user.transactions.slice(-20);
 
         res.status(200).send({ transactions: last20Transactions });
@@ -218,4 +224,23 @@ exports.getDailySpending = async (req, res) => {
     console.error('Error fetching daily spending:', error);
     res.status(500).json({ message: 'Error fetching daily spending', error: error.message || error });
   }
+};
+
+exports.updateLimit = async (req, res) => {
+    try {
+        const { userId, newLimit } = req.body;
+
+        // Find the user
+        const user = await User.findOne({ userId });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.dailyLimit = newLimit; 
+        await user.save();
+
+        res.status(200).json({ message: 'Limit updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 };
