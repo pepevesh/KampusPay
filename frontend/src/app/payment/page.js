@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Utensils, X, ArrowLeft, User } from 'lucide-react'
+import { User, X, ArrowLeft } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import axios from 'axios'
@@ -17,88 +17,76 @@ export default function Payment() {
   const [error, setError] = useState("")
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { user, token, updateUserFields } = useAuth()
+  const { user, token } = useAuth()
 
   useEffect(() => {
-    const id = searchParams.get('vendorId');
+    const id = searchParams.get('vendorId')
     if (id) {
-      setVendorId(id);
+      setVendorId(id)
     }
-  }, [searchParams]);
+  }, [searchParams])
 
   const handleNumberClick = (num) => {
     if (inputAmount.length < 8) {
-      const newAmount = inputAmount + num;
-      setInputAmount(newAmount);
-      setAmount((parseFloat(newAmount) / 100).toFixed(2));
+      const newAmount = inputAmount + num
+      setInputAmount(newAmount)
+      setAmount((parseFloat(newAmount) / 100).toFixed(2))
     }
-  };
+  }
 
   const handleDelete = () => {
     if (inputAmount.length > 0) {
-      const newAmount = inputAmount.slice(0, -1);
-      setInputAmount(newAmount);
-      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00");
+      const newAmount = inputAmount.slice(0, -1)
+      setInputAmount(newAmount)
+      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00")
     }
-  };
-
-  // New PIN handlers
-  const handlePinNumberClick = (num) => {
-    if (pin.length < 4) {
-      setPin(prevPin => prevPin + num);
-      setError(""); // Clear any previous errors
-    }
-  };
-
-  const handlePinDelete = () => {
-    if (pin.length > 0) {
-      setPin(prevPin => prevPin.slice(0, -1));
-    }
-  };
+  }
 
   const handlePayment = () => {
-    setIsPinModalOpen(true);
-  };
+    setIsPinModalOpen(true)
+  }
+
+  const handlePinNumberClick = (num) => {
+    if (pin.length < 4) {
+      setPin(pin + num)
+    }
+  }
+
+  const handlePinDelete = () => {
+    setPin(pin.slice(0, -1))
+  }
 
   const handlePinSubmit = async () => {
-    if (pin.length !== 4) {
-      setError("Please enter a 4-digit PIN");
-      return;
-    }
-
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/transaction/createTransaction`,
         {
           senderId: user.userId,
           receiverId: vendorId,
-          amount: parseFloat(amount),
-          category: 'food',
-          pin,
+          amount: parseInt(amount),
+          category: 'events',
+          pin: pin
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         }
-      );
+      )
 
       if (response.status === 200) {
-        const updatedBalance = user.balance - parseFloat(amount);
-        // Note: updateUserFields needs to be defined or imported from AuthContext
-        updateUserFields({ balance: updatedBalance });
-        router.push('/wallet');
+        router.push('/wallet')
       } else {
-        setError('Transaction failed. Please try again.');
+        setError('Transaction failed. Please try again.')
       }
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      setError('An error occurred. Please try again.')
     } finally {
-      setIsPinModalOpen(false);
-      setPin('');
+      setIsPinModalOpen(false)
+      setPin("")
     }
-  };
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -123,7 +111,7 @@ export default function Payment() {
           </div>
 
           <div className="text-center mb-4">
-            <h2 className="text-lg mb-1">Canteen</h2>
+            <h2 className="text-lg mb-1">User</h2>
             <div className="text-4xl font-bold flex items-center justify-center gap-1">
               {amount}
               <span className="text-lg">₹</span>
@@ -179,7 +167,7 @@ export default function Payment() {
                       <div
                         key={index}
                         className={`w-4 h-4 rounded-full ${
-                          pin.length > index ? "bg-indigo-500" : "bg-gray-500"
+                          pin.length > index ? 'bg-indigo-500' : 'bg-gray-500'
                         }`}
                       ></div>
                     ))}
