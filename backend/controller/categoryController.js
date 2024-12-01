@@ -22,7 +22,7 @@ const getCategoryWiseTransactions = async (req, res) => {
                     amount: 1,
                     category: {
                         $cond: {
-                            if: { $in: ["$category", ["food", "xerox", "event"]] }, 
+                            if: { $in: ["$category", ["canteen", "stationery", "recreation", "events"]] }, 
                             then: "$category",
                             else: "others"
                         }

@@ -12,6 +12,7 @@ export default function Wallet() {
   const [isModalOpen, setModalOpen] = useState(false)
   const { user, token } = useAuth()
   const [transactions, setTransactions] = useState([])
+  const [userDetails, setUserDetails] = useState()
 
   const fetchTransactions = async () => {
     try {
@@ -26,12 +27,31 @@ export default function Wallet() {
           },
         }
       )
+
+      const response_2 = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/getUserBalance`, 
+        { userId: user.userId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      )
       
       if (response.status === 200) {
         setTransactions(response.data.transactions)
       } else {
         console.error('Failed to fetch transactions')
       }
+
+      if (response_2.status === 200) {
+        setUserDetails(response_2.data.balance);
+        console.log(response_2.data);
+      } else {
+        console.error('Failed to fetch user details');
+      }
+
     } catch (error) {
       console.error('Error fetching transactions:', error)
     }
@@ -68,7 +88,7 @@ export default function Wallet() {
             <h2 className="text-lg mb-2">Total Balance</h2>
             <div className="flex items-center gap-2">
               <span className="text-xl">₹</span>
-              <span className="text-5xl font-bold">{user?.balance}</span>
+              <span className="text-5xl font-bold">{userDetails}</span>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <Button onClick={handleOpenModal} className="bg-[#7F3DFF] hover:bg-[#7F3DFF]/90 text-white py-6">
