@@ -1,5 +1,6 @@
 const Razorpay = require("razorpay");
 const User = require('../model/User');
+const Transaction = require('../model/Transaction');
 const {redisClient} = require('../config/redisdatabase');
 require('dotenv').config();
 
@@ -48,6 +49,14 @@ exports.webhook= async(req, res) => {
         console.log(userId);
         const user = await User.findOne({ userId });
         user.balance += (amount/100);
+        // Create and save the transaction
+        const transaction = new Transaction({
+            sender: user,
+            receiver: user,
+            amount,
+            category: "Wallet Top-up",
+            date: new Date(),
+        });
         await user.save();
     }
     catch(error){
