@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 const User = require('../model/User');
 const webpush = require('web-push');
 
+webpush.setVapidDetails(
+    'mailto:farhan786bugati@gmail.com', // Replace with your email
+    process.env.VAPID_PUBLIC_KEY, // VAPID Public Key (should be stored in env)
+    process.env.VAPID_PRIVATE_KEY // VAPID Private Key (should be stored in env)
+  );
+  
+
 exports.subscribe = async (req, res) => {
     const { subscription, userId } = req.body;
   
@@ -28,7 +35,7 @@ exports.unsubscribe = async (req, res) => {
 };
   
 // Route to send a push notification
-exports.sendNotification = async (req, res) => {
+exports.sendNotification(message) = async (req, res) => {
     const { message, userId } = req.body;
 
     const user = await User.findOne({ userId });
