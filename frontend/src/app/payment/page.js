@@ -18,6 +18,25 @@ export default function Payment() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, token } = useAuth()
+  const vendors = [
+    {
+      id: 'canteen1',
+      category: 'canteen',
+    },
+    {
+      id: 'stationery1',
+      category: 'stationery',
+    },
+    {
+      id: 'recreation1',
+      category: 'recreation',
+    },
+    {
+      id: 'events1',
+      category: 'events',
+    },
+  ];
+  
 
   useEffect(() => {
     const id = searchParams.get('vendorId')
@@ -56,7 +75,14 @@ export default function Payment() {
     setPin(pin.slice(0, -1))
   }
 
+  function getCategoryByVendorId(vendorId) {
+    const vendor = vendors.find(v => v.id === vendorId);
+    return vendor ? vendor.category : 'unknown';
+  }
+  
+
   const handlePinSubmit = async () => {
+    const category = getCategoryByVendorId(vendorId);
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/transaction/createTransaction`,
@@ -64,7 +90,7 @@ export default function Payment() {
           senderId: user.userId,
           receiverId: vendorId,
           amount: parseInt(amount),
-          category: 'events',
+          category,
           pin: pin
         },
         {

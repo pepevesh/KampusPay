@@ -59,7 +59,7 @@ const Navbar = () => {
             </div>
             
             <Link 
-              href="/"
+              href="/profile"
               className={`flex flex-col items-center gap-1 mr-1 ${
                 active === 'profile' ? 'text-[#7F3DFF]' : 'text-gray-400'
               }`}
