@@ -10,13 +10,19 @@ import { useAuth } from "@/context/AuthContext"
 export default function Dashboard() {
   const { user, token } = useAuth();
   const [dailySpending, setDailySpending] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch the daily spending data
     const fetchDailySpending = async () => {
+      if (!user?.id || !token) return;
+
+      setIsLoading(true);
+      setError(null);
+
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user?.id}/daily-spending`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/daily-spending`,
           {
             method: "GET",
             headers: {
@@ -34,13 +40,22 @@ export default function Dashboard() {
         setDailySpending(data.totalSpent);
       } catch (error) {
         console.error("Error fetching daily spending:", error);
+        setError("Failed to fetch daily spending. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (user?.userId) {
-      fetchDailySpending();
-    }
-  }, [user, token]);
+    fetchDailySpending();
+  }, [user?.id, token]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-900 mb-16">
@@ -108,20 +123,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Daily Spending Section */}
-        {/* <Card className="bg-gray-800 text-white border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Today's Spending</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-2xl font-bold">₹{dailySpending}</div>
-              <div className="text-xs text-muted-foreground">Total Spent Today</div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
     </div>
   );
 }
+

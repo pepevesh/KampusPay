@@ -1,21 +1,64 @@
 'use client'
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 
-const data = [
-  { name: "Sun", income: 40, spending: 65 },
-  { name: "Mon", income: 30, spending: 45 },
-  { name: "Tue", income: 25, spending: 55 },
-  { name: "Wed", income: 35, spending: 60 },
-  { name: "Thu", income: 20, spending: 70 },
-  { name: "Fri", income: 15, spending: 75 },
-  { name: "Today", income: 45, spending: 0 },
-]
+import { useState, useEffect } from "react"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { useAuth } from "@/context/AuthContext"
 
 export function SpendingChart() {
+  const [weeklyData, setWeeklyData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { user, token } = useAuth()
+
+  useEffect(() => {
+    const fetchWeeklySpending = async () => {
+      if (!user?.id || !token) return
+
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/daily-spending`,
+          {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch weekly spending")
+        }
+        console.log(response);
+
+        const data = await response.json()
+        setWeeklyData(data.weeklySpending)
+      } catch (error) {
+        console.error("Error fetching weekly spending:", error)
+        setError("Failed to fetch spending data. Please try again later.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchWeeklySpending()
+  }, [user?.id, token])
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-[240px]">Loading...</div>
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-[240px] text-red-500">{error}</div>
+  }
+
   return (
     <div className="pt-2">
       <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data}>
+        <BarChart data={weeklyData}>
           <XAxis
             dataKey="name"
             stroke="#888888"
@@ -28,16 +71,16 @@ export function SpendingChart() {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => `₹${value}`}
           />
-          <Bar
-            dataKey="income"
-            fill="#4ade80"
-            radius={[4, 4, 0, 0]}
+          <Tooltip
+            contentStyle={{ background: "#333", border: "none" }}
+            itemStyle={{ color: "#fff" }}
+            formatter={(value) => [`₹${value}`, "Spending"]}
           />
           <Bar
             dataKey="spending"
-            fill="#f43f5e"
+            fill="#7F3DFF"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
