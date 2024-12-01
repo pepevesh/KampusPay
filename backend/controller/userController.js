@@ -143,14 +143,20 @@ exports.getUserTransactions = async (req, res) => {
     try {
         const { userId } = req.body;
 
+        // Find the user and populate the transactions along with sender and receiver details
         const user = await User.findOne({ userId }).populate({
             path: 'transactions',
+            populate: [
+                { path: 'sender', select: 'userId name' },
+                { path: 'receiver', select: 'userId name' },
+            ],
         });
 
         if (!user) {
             return res.status(404).send({ error: 'User not found.' });
         }
 
+        // Get the last 20 transactions
         const last20Transactions = user.transactions.slice(-20);
 
         res.status(200).send({ transactions: last20Transactions });

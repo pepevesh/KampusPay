@@ -3,6 +3,6 @@ const router = express.Router();
 const { createTransaction } = require('../controller/transactionController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.post('/createTransaction', authMiddleware(), createTransaction);
+router.post('/createTransaction',createTransaction);
 
 module.exports = router;
