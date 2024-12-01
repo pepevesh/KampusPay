@@ -1,9 +1,12 @@
+const mongoose = require('mongoose');
 const User = require('../model/User');
+const Transaction = require('../model/Transaction')
 const {comparePassword,hashPassword} = require('../utils/passwordUtils');
 const crypto = require('crypto');
 const { redisClient} = require('../config/redisdatabase');
 const {sendOTPEmail}= require('../services/OTPservice');
 const { promisify } = require('util');
+// const { Transaction } = require('mongodb');
 require('dotenv').config();
 
 exports.sendOtp = async (req, res) => {
@@ -167,4 +170,49 @@ exports.getUserWithoutTransactions = async (req, res) => {
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
+};
+
+exports.getDailySpending = async (req, res) => {
+  const { userId } = req.params;
+  console.log('User ID:', userId);
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
+
+    // Start of today in IST
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of the day in IST (local time)
+    const offset = today.getTimezoneOffset() * 60000; // Get timezone offset in milliseconds
+    const todayInUTC = new Date(today.getTime() - offset); // Convert to UTC
+
+    // Start of tomorrow in UTC
+    const tomorrow = new Date(todayInUTC);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const result = await Transaction.aggregate([
+      {
+        $match: {
+          sender: new mongoose.Types.ObjectId(userId),
+          time: { $gte: todayInUTC, $lt: tomorrow }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalSpent: { $sum: "$amount" }
+        }
+      }
+    ]);
+
+    console.log('Aggregation result:', result);
+
+    const totalSpent = result.length > 0 ? result[0].totalSpent : 0;
+    res.status(200).json({ totalSpent });
+
+  } catch (error) {
+    console.error('Error fetching daily spending:', error);
+    res.status(500).json({ message: 'Error fetching daily spending', error: error.message || error });
+  }
 };
