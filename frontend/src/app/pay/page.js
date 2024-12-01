@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
-import { Utensils, Printer, Megaphone, User, BanIcon as Badminton } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { useRouter } from 'next/navigation';
+import { Utensils, Printer, Megaphone, User, BanIcon as Badminton } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const vendors = [
   {
@@ -31,14 +31,18 @@ const vendors = [
     name: 'Others',
     icon: User,
   },
-]
+];
 
 export default function VendorsPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleVendorSelect = (vendorId) => {
-    router.push(`/payment?vendorId=${vendorId}`)
-  }
+    if (vendorId === 'others1') {
+      router.push(`/scan`);
+    } else {
+      router.push(`/payment?vendorId=${vendorId}`);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -50,7 +54,7 @@ export default function VendorsPage() {
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             {vendors.map((vendor) => {
-              const Icon = vendor.icon
+              const Icon = vendor.icon;
               return (
                 <Button
                   key={vendor.id}
@@ -63,12 +67,11 @@ export default function VendorsPage() {
                     {vendor.name}
                   </span>
                 </Button>
-              )
+              );
             })}
           </div>
         </div>
       </Card>
     </div>
-  )
+  );
 }
-

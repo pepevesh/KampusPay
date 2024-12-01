@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation'
 import { Html5Qrcode } from "html5-qrcode"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export default function Scanner() {
   const [error, setError] = useState(null)
   const [scanning, setScanning] = useState(false)
   const [html5QrCode, setHtml5QrCode] = useState(null)
+  const [manualVendorId, setManualVendorId] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function Scanner() {
             console.log(decodedText)
             if (parsedData.vendorId) {
               html5QrCode.stop().catch(console.error)
-              router.push(`/pay?vendorId=${parsedData.vendorId}`)
+              router.push(`/payment?vendorId=${parsedData.vendorId}`)
             } else {
               setError('Invalid QR code: No vendor ID found')
             }
@@ -86,6 +88,14 @@ export default function Scanner() {
     }
   }, [html5QrCode])
 
+  const handleManualEntry = () => {
+    if (manualVendorId.trim()) {
+      router.push(`/payment?vendorId=${manualVendorId.trim()}`)
+    } else {
+      setError('Please enter a valid Vendor ID')
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Card className="w-full max-w-md bg-gray-800 text-gray-100 border-gray-700">
@@ -107,14 +117,24 @@ export default function Scanner() {
             )}
           </div>
 
-          <Button
-            className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
-            onClick={() => router.push('/pay')}
-          >
-            Enter Vendor ID Manually
-          </Button>
+          <div className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Enter Vendor ID manually"
+              value={manualVendorId}
+              onChange={(e) => setManualVendorId(e.target.value)}
+              className="w-full py-2 px-3 bg-gray-700 text-gray-100 rounded-lg"
+            />
+            <Button
+              className="w-full py-4 text-lg bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+              onClick={handleManualEntry}
+            >
+              Enter Vendor ID Manually
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
   )
 }
+
