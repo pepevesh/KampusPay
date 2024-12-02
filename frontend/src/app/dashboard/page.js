@@ -1,22 +1,21 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { StatsCard } from "@/components/stats-card"
-import { SpendingChart } from "@/components/spending-chart"
-import { SpendingDonut } from "@/components/spending-donut"
-import { useAuth } from "@/context/AuthContext"
-import { Button } from "@/components/ui/button"
-import { Pencil } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCard } from "@/components/stats-card";
+import { SpendingChart } from "@/components/spending-chart";
+import { SpendingDonut } from "@/components/spending-donut";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
   const { user, token } = useAuth();
   const [dailySpending, setDailySpending] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditingLimit, setIsEditingLimit] = useState(false);
-  const [newDailyLimit, setNewDailyLimit] = useState(user?.dailyLimit || 0);
+
+  const [inputValue, setInputValue] = useState("");
+  const [adminData, setAdminData] = useState(null);
+  const [adminError, setAdminError] = useState(null);
 
   useEffect(() => {
     const fetchDailySpending = async () => {
@@ -31,7 +30,7 @@ export default function Dashboard() {
           {
             method: "GET",
             headers: {
-              "Authorization": `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
@@ -54,32 +53,38 @@ export default function Dashboard() {
     fetchDailySpending();
   }, [user?.id, token]);
 
-  const updateDailyLimit = async () => {
-    if (!token || !user?.id) return;
+  const handleAdminSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!inputValue.trim()) {
+      setAdminError("Input cannot be empty.");
+      return;
+    }
+
+    setAdminError(null);
+    setAdminData(null);
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/user/updateLimit`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/${inputValue}`,
         {
-          method: "PATCH",
+          method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ dailyLimit: newDailyLimit }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update daily limit");
+        throw new Error("Failed to fetch data for the input value.");
       }
 
       const data = await response.json();
-      setIsEditingLimit(false);
-      user.dailyLimit = newDailyLimit; // Update the user's daily limit
+      setAdminData(data);
     } catch (error) {
-      console.error("Error updating daily limit:", error);
-      setError("Failed to update daily limit. Please try again later.");
+      console.error("Error fetching admin data:", error);
+      setAdminError("Unable to fetch data. Please check the input value.");
     }
   };
 
@@ -100,52 +105,48 @@ export default function Dashboard() {
             value={user?.balance}
             className="bg-gray-800 text-white border-gray-700"
           />
+          <StatsCard
+            title="Daily Limit"
+            value={`₹${dailySpending}/${user?.dailyLimit}`}
+            subtitle="Today's spending limit"
+            className="bg-gray-800 text-white border-gray-700"
+          />
+        </div>
+
+        {/* Admin Functionality */}
+        {user?.userId === "admin" && (
           <Card className="bg-gray-800 text-white border-gray-700">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium">Daily Limit</CardTitle>
-                {!isEditingLimit ? (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="text-white hover:text-gray-400"
-                    onClick={() => setIsEditingLimit(true)}
-                  >
-                    <Pencil className="h-5 w-5" />
-                  </Button>
-                ) : null}
-              </div>
+              <CardTitle className="text-lg font-medium">Admin Panel</CardTitle>
             </CardHeader>
             <CardContent>
-              {isEditingLimit ? (
-                <div className="flex items-center space-x-4">
-                  <Input
-                    type="number"
-                    value={newDailyLimit}
-                    onChange={(e) => setNewDailyLimit(e.target.value)}
-                    className="bg-gray-700 text-white"
-                  />
-                  <Button
-                    onClick={updateDailyLimit}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    onClick={() => setIsEditingLimit(false)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Cancel
-                  </Button>
+              <form onSubmit={handleAdminSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Enter User ID or Value"
+                  className="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Fetch Data
+                </button>
+              </form>
+              {adminError && <p className="text-red-500 mt-2">{adminError}</p>}
+              {adminData && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-green-500 font-bold">Fetched Data:</p>
+                  <pre className="p-2 bg-gray-700 rounded-md text-white">
+                    {JSON.stringify(adminData, null, 2)}
+                  </pre>
                 </div>
-              ) : (
-                <p className="text-2xl">
-                  ₹{dailySpending}/{user?.dailyLimit}
-                </p>
               )}
             </CardContent>
           </Card>
-        </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="bg-gray-800 text-white border-gray-700">
