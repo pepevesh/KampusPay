@@ -4,6 +4,6 @@ const { makePayment, webhook } = require('../controller/paymentController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/makePayment', authMiddleware(), makePayment);
-router.post('/makePaymentsuccess', authMiddleware(), webhook);
+router.post('/makePaymentsuccess', webhook);
 
 module.exports = router;
