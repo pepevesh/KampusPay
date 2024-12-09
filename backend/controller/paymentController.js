@@ -64,7 +64,7 @@ exports.webhook= async(req, res) => {
             user.transactions.push(transaction);
             await user.save();
             await transaction.save();
-            redisClient.del(orderid);
+            await redisClient.del(orderid);
         }
     }
     catch(error){
