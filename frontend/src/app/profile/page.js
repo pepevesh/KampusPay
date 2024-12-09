@@ -19,6 +19,7 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+
 export default function ProfilePage() {
   const [showQR, setShowQR] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -50,8 +51,8 @@ export default function ProfilePage() {
     logout();
   };
 
-  const generateQR = () => {
-    setShowQR(true);
+  const toggleQR = () => {
+    setShowQR((prev) => !prev); // Toggle the QR code display
   };
 
   const subscribeToPush = async () => {
@@ -183,7 +184,7 @@ export default function ProfilePage() {
           <Button variant="outline" onClick={handleLogout} className="text-gray-700 hover:bg-gray-200 border-gray-300">
             Logout
           </Button>
-          <Button onClick={generateQR} className="bg-primary text-white hover:bg-primary/90">
+          <Button onClick={toggleQR} className="bg-primary text-white hover:bg-primary/90">
             {showQR ? 'Hide QR' : 'Generate QR'}
           </Button>
         </CardFooter>

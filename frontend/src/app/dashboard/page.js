@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatsCard } from "@/components/stats-card";
 import { SpendingChart } from "@/components/spending-chart";
@@ -10,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 export default function Dashboard() {
   const { user, token } = useAuth();
   const [dailySpending, setDailySpending] = useState(0);
+  const [userBalance, setUserBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,6 +20,31 @@ export default function Dashboard() {
   const [adminError, setAdminError] = useState(null);
 
   useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (!user?.userId || !token) return;
+
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/getUserBalance`,
+          { userId: user.userId },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setUserBalance(response.data.balance);
+        } else {
+          console.error("Failed to fetch user details");
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
     const fetchDailySpending = async () => {
       if (!user?.id || !token) return;
 
@@ -50,8 +77,9 @@ export default function Dashboard() {
       }
     };
 
+    fetchUserDetails();
     fetchDailySpending();
-  }, [user?.id, token]);
+  }, [user?.userId, user?.id, token]);
 
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
@@ -102,7 +130,7 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2">
           <StatsCard
             title="Total Balance"
-            value={user?.balance}
+            value={`₹${userBalance}`}
             className="bg-gray-800 text-white border-gray-700"
           />
           <StatsCard
