@@ -33,11 +33,16 @@ const AuthProviderWithRouter = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
+      try{
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
+          {},
+          { withCredentials: true }
+        );
+      }
+      catch(error){
+        console.error('Logout call failed:', error);
+      }
       setAccessToken(null);
       setUser(null);
       localStorage.removeItem('accessToken');
