@@ -1,85 +1,83 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { User, X, ArrowLeft } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import axios from 'axios'
-import { useAuth } from '@/context/AuthContext'
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { User, X, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Payment() {
-  const [amount, setAmount] = useState("0")
-  const [inputAmount, setInputAmount] = useState("")
-  const [vendorId, setVendorId] = useState("")
-  const [isPinModalOpen, setIsPinModalOpen] = useState(false)
-  const [pin, setPin] = useState("")
-  const [error, setError] = useState("")
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const { user, token } = useAuth()
+  const [amount, setAmount] = useState("0");
+  const [inputAmount, setInputAmount] = useState("");
+  const [vendorId, setVendorId] = useState("");
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user, token } = useAuth();
   const vendors = [
     {
-      id: 'canteen1',
-      category: 'canteen',
+      id: "canteen1",
+      category: "canteen",
     },
     {
-      id: 'stationery1',
-      category: 'stationery',
+      id: "stationery1",
+      category: "stationery",
     },
     {
-      id: 'recreation1',
-      category: 'recreation',
+      id: "recreation1",
+      category: "recreation",
     },
     {
-      id: 'events1',
-      category: 'events',
+      id: "events1",
+      category: "events",
     },
   ];
-  
 
   useEffect(() => {
-    const id = searchParams.get('vendorId')
+    const id = searchParams.get("vendorId");
     if (id) {
-      setVendorId(id)
+      setVendorId(id);
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleNumberClick = (num) => {
     if (inputAmount.length < 8) {
-      const newAmount = inputAmount + num
-      setInputAmount(newAmount)
-      setAmount((parseFloat(newAmount) / 100).toFixed(2))
+      const newAmount = inputAmount + num;
+      setInputAmount(newAmount);
+      setAmount((parseFloat(newAmount) / 100).toFixed(2));
     }
-  }
+  };
 
   const handleDelete = () => {
     if (inputAmount.length > 0) {
-      const newAmount = inputAmount.slice(0, -1)
-      setInputAmount(newAmount)
-      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00")
+      const newAmount = inputAmount.slice(0, -1);
+      setInputAmount(newAmount);
+      setAmount(newAmount ? (parseFloat(newAmount) / 100).toFixed(2) : "0.00");
     }
-  }
+  };
 
   const handlePayment = () => {
-    setIsPinModalOpen(true)
-  }
+    setIsPinModalOpen(true);
+  };
 
   const handlePinNumberClick = (num) => {
     if (pin.length < 4) {
-      setPin(pin + num)
+      setPin(pin + num);
     }
-  }
+  };
 
   const handlePinDelete = () => {
-    setPin(pin.slice(0, -1))
-  }
+    setPin(pin.slice(0, -1));
+  };
 
   function getCategoryByVendorId(vendorId) {
-    const vendor = vendors.find(v => v.id === vendorId);
-    return vendor ? vendor.category : 'unknown';
+    const vendor = vendors.find((v) => v.id === vendorId);
+    return vendor ? vendor.category : "unknown";
   }
-  
 
   const handlePinSubmit = async () => {
     const category = getCategoryByVendorId(vendorId);
@@ -91,28 +89,28 @@ export default function Payment() {
           receiverId: vendorId,
           amount: parseInt(amount),
           category,
-          pin: pin
+          pin: pin,
         },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        }
-      )
+        },
+      );
 
       if (response.status === 200) {
-        router.push('/wallet')
+        router.push("/wallet");
       } else {
-        setError('Transaction failed. Please try again.')
+        setError("Transaction failed. Please try again.");
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError("An error occurred. Please try again.");
     } finally {
-      setIsPinModalOpen(false)
-      setPin("")
+      setIsPinModalOpen(false);
+      setPin("");
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -127,7 +125,9 @@ export default function Payment() {
           </Button>
           <div className="text-center mb-4">
             <h1 className="text-2xl mb-2">Payment</h1>
-            <p className="text-sm text-gray-400">ID: {vendorId || 'Not specified'}</p>
+            <p className="text-sm text-gray-400">
+              ID: {vendorId || "Not specified"}
+            </p>
           </div>
 
           <div className="flex justify-center mb-4">
@@ -193,7 +193,7 @@ export default function Payment() {
                       <div
                         key={index}
                         className={`w-4 h-4 rounded-full ${
-                          pin.length > index ? 'bg-indigo-500' : 'bg-gray-500'
+                          pin.length > index ? "bg-indigo-500" : "bg-gray-500"
                         }`}
                       ></div>
                     ))}
@@ -233,11 +233,13 @@ export default function Payment() {
               >
                 Confirm Payment
               </Button>
-              {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+              {error && (
+                <p className="text-red-500 text-center mt-2">{error}</p>
+              )}
             </div>
           </Card>
         </div>
       )}
     </div>
-  )
+  );
 }

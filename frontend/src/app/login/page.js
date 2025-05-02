@@ -1,11 +1,17 @@
-'use client'
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
@@ -22,7 +28,7 @@ export default function LoginForm() {
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prevData => ({ ...prevData, [id]: value }));
+    setFormData((prevData) => ({ ...prevData, [id]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -62,7 +68,9 @@ export default function LoginForm() {
               <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="userId" className="text-gray-300">User ID</Label>
+              <Label htmlFor="userId" className="text-gray-300">
+                User ID
+              </Label>
               <Input
                 id="userId"
                 type="text"
@@ -75,7 +83,9 @@ export default function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">Password</Label>
+              <Label htmlFor="password" className="text-gray-300">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -86,12 +96,12 @@ export default function LoginForm() {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-[#7F3DFF] hover:bg-[#6A2FD9] text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
 
             <p className="text-sm text-center text-gray-400">

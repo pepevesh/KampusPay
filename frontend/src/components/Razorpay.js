@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ const RazorpayPayment = ({ onClose }) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("INR");
   const [loading, setLoading] = useState(false);
-  const {user,token} = useAuth();
+  const { user, token } = useAuth();
 
   const loadRazorpayScript = () =>
     new Promise((resolve) => {
@@ -36,16 +36,19 @@ const RazorpayPayment = ({ onClose }) => {
     setLoading(true);
 
     try {
-        const id= user.userId;
-      console.log(amount)
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL+"/api/payment/makePayment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+      const id = user.userId;
+      console.log(amount);
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/payment/makePayment",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ userId: id, amount }),
         },
-        body: JSON.stringify({ userId:id,amount }),
-      });
+      );
 
       const order = await response.json();
 
@@ -58,7 +61,9 @@ const RazorpayPayment = ({ onClose }) => {
           description: "Add Balance",
           order_id: order.id,
           handler: (response) => {
-            alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+            alert(
+              `Payment successful! Payment ID: ${response.razorpay_payment_id}`,
+            );
             onClose();
           },
           prefill: {
@@ -91,7 +96,10 @@ const RazorpayPayment = ({ onClose }) => {
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="amount"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Amount (in ₹)
         </label>
         <Input
@@ -104,7 +112,10 @@ const RazorpayPayment = ({ onClose }) => {
       </div>
 
       <div>
-        <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="currency"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Currency
         </label>
         <select

@@ -1,34 +1,40 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Utensils, Printer, Megaphone, User, BanIcon as Badminton } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useRouter } from "next/navigation";
+import {
+  Utensils,
+  Printer,
+  Megaphone,
+  User,
+  BanIcon as Badminton,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 const vendors = [
   {
-    id: 'canteen1',
-    name: 'Canteen',
+    id: "canteen1",
+    name: "Canteen",
     icon: Utensils,
   },
   {
-    id: 'stationery1',
-    name: 'Stationery',
+    id: "stationery1",
+    name: "Stationery",
     icon: Printer,
   },
   {
-    id: 'recreation1',
-    name: 'Recreation',
+    id: "recreation1",
+    name: "Recreation",
     icon: Badminton,
   },
   {
-    id: 'events1',
-    name: 'Events',
+    id: "events1",
+    name: "Events",
     icon: Megaphone,
   },
   {
-    id: 'others1',
-    name: 'Others',
+    id: "others1",
+    name: "Others",
     icon: User,
   },
 ];
@@ -37,7 +43,7 @@ export default function VendorsPage() {
   const router = useRouter();
 
   const handleVendorSelect = (vendorId) => {
-    if (vendorId === 'others1') {
+    if (vendorId === "others1") {
       router.push(`/scan`);
     } else {
       router.push(`/payment?vendorId=${vendorId}`);

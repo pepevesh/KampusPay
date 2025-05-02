@@ -1,73 +1,76 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
-import { useAuth } from '@/context/AuthContext'
+import { useState, useEffect } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { useAuth } from "@/context/AuthContext";
 
 export function SpendingDonut() {
-  const [categoryData, setCategoryData] = useState([]) // State to hold category-wise data
-  const [totalAmount, setTotalAmount] = useState(0) // State to hold total amount spent
-  const { user, token } = useAuth() // Replace with dynamic user ID (e.g., from context or session)
+  const [categoryData, setCategoryData] = useState([]); // State to hold category-wise data
+  const [totalAmount, setTotalAmount] = useState(0); // State to hold total amount spent
+  const { user, token } = useAuth(); // Replace with dynamic user ID (e.g., from context or session)
 
   useEffect(() => {
     // Fetch category-wise transaction data
     const fetchCategoryData = async () => {
       try {
-        console.log(user)
+        console.log(user);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/category/${user?.id}/categories`,
           {
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-          }
-        )
+          },
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch category data')
+          throw new Error("Failed to fetch category data");
         }
 
-        const data = await response.json()
-        console.log(data)
+        const data = await response.json();
+        console.log(data);
 
         // Map response to chart data format
         const chartData = data.map((item) => ({
           name: item._id,
           value: Math.abs(item.totalAmount),
           color: getCategoryColor(item._id),
-        }))
+        }));
 
-        setCategoryData(chartData)
+        setCategoryData(chartData);
 
         // Calculate total amount spent (absolute value of totalAmount)
-        const total = data.reduce((acc, item) => acc + Math.abs(item.totalAmount), 0)
-        setTotalAmount(total)
+        const total = data.reduce(
+          (acc, item) => acc + Math.abs(item.totalAmount),
+          0,
+        );
+        setTotalAmount(total);
       } catch (error) {
-        console.error('Error fetching category data:', error)
+        console.error("Error fetching category data:", error);
       }
-    }
+    };
 
     if (user && token) {
-      fetchCategoryData()
+      fetchCategoryData();
     }
-  }, [user, token])
+  }, [user, token]);
 
   // Function to get color based on category name
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'canteen':
-        return '#4ade80'
-      case 'stationery':
-        return '#a78bfa'
-      case 'recreation':
-        return '#f43f5e'
-      case 'events':
-        return '#fbbf24'
+      case "canteen":
+        return "#4ade80";
+      case "stationery":
+        return "#a78bfa";
+      case "recreation":
+        return "#f43f5e";
+      case "events":
+        return "#fbbf24";
       default:
-        return '#ffffff'
+        return "#ffffff";
     }
-  }
+  };
 
   return (
     <div className="relative h-[240px]">
@@ -95,5 +98,5 @@ export function SpendingDonut() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,7 +1,14 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 import { useAuth } from "@/context/AuthContext";
 
 export function SpendingChart() {
@@ -36,7 +43,7 @@ export function SpendingChart() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -46,10 +53,21 @@ export function SpendingChart() {
 
         const { spendingByDay } = await response.json();
 
-        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const daysOfWeek = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
         const currentDayIndex = new Date().getDay();
         const chartData = spendingByDay.map((spending, index) => ({
-          name: index === 6 ? "Today" : daysOfWeek[(currentDayIndex + 7 - 6 + index) % 7],
+          name:
+            index === 6
+              ? "Today"
+              : daysOfWeek[(currentDayIndex + 7 - 6 + index) % 7],
           spending,
           isToday: index === 6, // Flag for the "Today" bar
         }));
@@ -66,7 +84,9 @@ export function SpendingChart() {
   }, [user, token]);
 
   if (isLoading) {
-    return <p className="text-gray-500 text-center">Loading weekly spending...</p>;
+    return (
+      <p className="text-gray-500 text-center">Loading weekly spending...</p>
+    );
   }
 
   if (error) {
@@ -87,9 +107,11 @@ export function SpendingChart() {
               const color = payload.isToday
                 ? "#3182CE" // Blue for "Today"
                 : payload.spending > (user?.dailyLimit || Infinity)
-                ? "#E53E3E" // Red if spending exceeds the limit
-                : "#38A169"; // Green otherwise
-              return <rect x={x} y={y} width={width} height={height} fill={color} />;
+                  ? "#E53E3E" // Red if spending exceeds the limit
+                  : "#38A169"; // Green otherwise
+              return (
+                <rect x={x} y={y} width={width} height={height} fill={color} />
+              );
             }}
           />
         </BarChart>

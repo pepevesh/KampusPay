@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -29,10 +29,10 @@ export default function Dashboard() {
           { userId: user.userId },
           {
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.status === 200) {
@@ -60,7 +60,7 @@ export default function Dashboard() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -98,10 +98,10 @@ export default function Dashboard() {
         {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -213,7 +213,10 @@ export default function Dashboard() {
                   { name: "Events", color: "#fbbf24" },
                   { name: "Others", color: "#f43f5e" },
                 ].map((category) => (
-                  <div key={category.name} className="flex items-center space-x-2">
+                  <div
+                    key={category.name}
+                    className="flex items-center space-x-2"
+                  >
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: category.color }}
