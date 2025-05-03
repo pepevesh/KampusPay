@@ -11,7 +11,7 @@ require('dotenv').config();
 app.use(express.json());
 const bodyParser = require("body-parser");
 
-app.use(cors({origin:["http://localhost:3000","https://kampus-pay.vercel.app"], credentials:true}));
+app.use(cors({origin:["http://localhost:3000","https://kampus-pay-seven.vercel.app"], credentials:true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 connectDB();
