@@ -20,6 +20,8 @@ export default function Dashboard() {
   const [adminHashedUserIdInput, setAdminHashedUserIdInput] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditingLimit, setIsEditingLimit] = useState(false);
+  const [newDailyLimit, setNewDailyLimit] = useState(user?.dailyLimit || 0);
 
   const [inputValue, setInputValue] = useState("");
   const [adminData, setAdminData] = useState(null);
