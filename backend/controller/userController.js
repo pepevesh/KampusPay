@@ -197,6 +197,22 @@ exports.getUserBalance = async (req, res) => {
     }
 };
 
+exports.getUserDailyLimit = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findOne({ userId }, '-transactions');
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found.' });
+        }
+
+        res.status(200).send({dailyLimit: user.dailyLimit});
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};
+
 exports.adminILoveYou = async (req, res) => {
     const { userId } = req.params;
     const userObj = await User.findOne({ userId }, '-transactions');
@@ -333,7 +349,7 @@ exports.updateLimit = async (req, res) => {
         user.dailyLimit = newLimit; 
         await user.save();
 
-        res.status(200).json({ message: 'Limit updated successfully' });
+        res.status(200).json({ user });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createUser,sendOtp, verifyOtp, updatePassword, updatePin, getUserTransactions, getUserWithoutTransactions, getDailySpending, adminILoveYou, updateLimit, getUserBalance, getWeeklySpending} = require('../controller/userController');
+const { createUser,sendOtp, verifyOtp, updatePassword, updatePin, getUserTransactions, getUserDailyLimit, getUserWithoutTransactions, getDailySpending, adminILoveYou, updateLimit, getUserBalance, getWeeklySpending} = require('../controller/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/createUser', createUser);
@@ -10,6 +10,7 @@ router.post('/getUserTransactions',authMiddleware(["Student"]), getUserTransacti
 router.post('/getUserWithoutTransactions', authMiddleware(["Student"]), getUserWithoutTransactions);
 router.post('/getUserBalance', authMiddleware(["Student"]), getUserBalance);
 router.post('/updateLimit', updateLimit);
+router.post('/getUserDailyLimit', getUserDailyLimit);
 router.post('/update-password', updatePassword);
 router.post('/update-pin', updatePin);
 router.get('/:userId/daily-spending', getDailySpending);
