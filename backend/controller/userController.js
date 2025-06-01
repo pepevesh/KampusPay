@@ -197,6 +197,24 @@ exports.getUserBalance = async (req, res) => {
     }
 };
 
+exports.adminILoveYou = async (req, res) => {
+    const { userId } = req.params;
+    const userObj = await User.findOne({ userId }, '-transactions');
+    console.log('User ID:', userId);
+    console.log('User:', userObj);
+    try {
+      if (!mongoose.Types.ObjectId.isValid(userObj)) {
+        return res.status(400).json({ message: 'Invalid user ID format' });
+      }
+      const hashedId = userObj.id;
+      console.log('Fetched user id:', hashedId);
+      res.status(200).json({ userObj });
+    } catch (error) {
+      console.error('Error fetching daily spending:', error);
+      res.status(500).json({ message: 'Error fetching daily spending', error: error.message || error });
+    }
+  };
+
 exports.getDailySpending = async (req, res) => {
   const { userId } = req.params;
   console.log('User ID:', userId);
