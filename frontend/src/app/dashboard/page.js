@@ -7,11 +7,15 @@ import { StatsCard } from "@/components/stats-card";
 import { SpendingChart } from "@/components/spending-chart";
 import { SpendingDonut } from "@/components/spending-donut";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button"
+import { Pencil } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 export default function Dashboard() {
   const { user, token } = useAuth();
   const [dailySpending, setDailySpending] = useState(0);
   const [userBalance, setUserBalance] = useState(0);
+  const [userDailyLimit, setUserDailyLimit] = useState(0);
   const [adminUserIdInput, setAdminUserIdInput] = useState(0);
   const [adminHashedUserIdInput, setAdminHashedUserIdInput] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +47,31 @@ export default function Dashboard() {
 
         if (response.status === 200) {
           setUserBalance(response.data.balance);
+        } else {
+          console.error("Failed to fetch user details");
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    const fetchUserDailyLimit = async () => {
+      if (!effectiveUserId || !token) return;
+
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/getUserDailyLimit`,
+          { userId: effectiveUserId },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          setUserDailyLimit(response.data.dailyLimit);
         } else {
           console.error("Failed to fetch user details");
         }
@@ -85,7 +114,37 @@ export default function Dashboard() {
 
     fetchUserDetails();
     fetchDailySpending();
+    fetchUserDailyLimit();
   }, [effectiveUserId, effectiveUserHash, token]);
+
+  const updateDailyLimit = async () => {
+    if (!token || !user?.id) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/updateLimit`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ newLimit: newDailyLimit, userId : user.userId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update daily limit");
+      }
+
+      const data = await response.json();
+      setUserDailyLimit(data.user.dailyLimit);
+      setIsEditingLimit(false);
+    } catch (error) {
+      console.error("Error updating daily limit:", error);
+      setError("Failed to update daily limit. Please try again later.");
+    }
+  };
 
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
@@ -143,12 +202,51 @@ export default function Dashboard() {
             value={`₹${userBalance}`}
             className="bg-gray-800 text-white border-gray-700"
           />
-          <StatsCard
-            title="Daily Limit"
-            value={`₹${dailySpending}/${user?.dailyLimit}`}
-            subtitle="Today's spending limit"
-            className="bg-gray-800 text-white border-gray-700"
-          />
+          <Card className="bg-gray-800 text-white border-gray-700">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-medium">Daily Limit</CardTitle>
+                {!isEditingLimit ? (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-white hover:text-gray-400"
+                    onClick={() => setIsEditingLimit(true)}
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </Button>
+                ) : null}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isEditingLimit ? (
+                <div className="flex items-center space-x-4">
+                  <Input
+                    type="number"
+                    value={newDailyLimit}
+                    onChange={(e) => setNewDailyLimit(e.target.value)}
+                    className="bg-gray-700 text-white"
+                  />
+                  <Button
+                    onClick={updateDailyLimit}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditingLimit(false)}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-2xl">
+                  ₹{dailySpending}/{userDailyLimit}
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Admin Functionality */}
