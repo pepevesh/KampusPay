@@ -12,6 +12,8 @@ export default function Dashboard() {
   const { user, token } = useAuth();
   const [dailySpending, setDailySpending] = useState(0);
   const [userBalance, setUserBalance] = useState(0);
+  const [adminUserIdInput, setAdminUserIdInput] = useState(0);
+  const [adminHashedUserIdInput, setAdminHashedUserIdInput] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,14 +21,18 @@ export default function Dashboard() {
   const [adminData, setAdminData] = useState(null);
   const [adminError, setAdminError] = useState(null);
 
+  const isAdmin = user?.userId === "admin";
+  const effectiveUserId = isAdmin && adminHashedUserIdInput ? adminUserIdInput : user?.userId;
+  const effectiveUserHash = isAdmin && adminHashedUserIdInput ? adminHashedUserIdInput : user?.id;
+
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (!user?.userId || !token) return;
+      if (!effectiveUserId || !token) return;
 
       try {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/api/user/getUserBalance`,
-          { userId: user.userId },
+          { userId: effectiveUserId },
           {
             headers: {
               "Content-Type": "application/json",
@@ -46,14 +52,14 @@ export default function Dashboard() {
     };
 
     const fetchDailySpending = async () => {
-      if (!user?.id || !token) return;
+      if (!effectiveUserHash || !token) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/daily-spending`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${effectiveUserHash}/daily-spending`,
           {
             method: "GET",
             headers: {
@@ -79,7 +85,7 @@ export default function Dashboard() {
 
     fetchUserDetails();
     fetchDailySpending();
-  }, [user?.userId, user?.id, token]);
+  }, [effectiveUserId, effectiveUserHash, token]);
 
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
@@ -90,11 +96,13 @@ export default function Dashboard() {
     }
 
     setAdminError(null);
-    setAdminData(null);
+    setAdminUserIdInput(inputValue);
+    setAdminHashedUserIdInput(null);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/user/${inputValue}`,
+      console.log(inputValue);
+      const responseId = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/${inputValue}/admin-love`,
         {
           method: "GET",
           headers: {
@@ -104,11 +112,13 @@ export default function Dashboard() {
         },
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch data for the input value.");
+      if (!responseId.ok) {
+        throw new Error("Failed to fetch user hashed id");
       }
 
-      const data = await response.json();
+      const data = await responseId.json();
+      console.log(data.userObj._id);
+      setAdminHashedUserIdInput(data.userObj._id);
       setAdminData(data);
     } catch (error) {
       console.error("Error fetching admin data:", error);
@@ -168,7 +178,15 @@ export default function Dashboard() {
                 <div className="mt-4 space-y-2">
                   <p className="text-green-500 font-bold">Fetched Data:</p>
                   <pre className="p-2 bg-gray-700 rounded-md text-white">
-                    {JSON.stringify(adminData, null, 2)}
+                    {JSON.stringify({
+                      userId: adminData.userObj.userId,
+                      name: adminData.userObj.name,
+                      email: adminData.userObj.email,
+                      encrypted_id: adminData.userObj._id,
+                      balance: adminData.userObj.balance,
+                      dailyLimit: adminData.userObj.dailyLimit,
+                      usedCoupons: adminData.userObj.usedCoupons,
+                    }, null, 2)}
                   </pre>
                 </div>
               )}
@@ -181,15 +199,12 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg font-medium">
                 Your Spending
-                <select className="bg-gray-700 border-gray-600 rounded-md text-sm">
-                  <option>This Week</option>
-                  <option>This Month</option>
-                  <option>This Year</option>
-                </select>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SpendingChart />
+              <SpendingChart
+                userId={effectiveUserHash}
+              />
             </CardContent>
           </Card>
 
@@ -197,15 +212,12 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg font-medium">
                 Spending Habits
-                <select className="bg-gray-700 border-gray-600 rounded-md text-sm">
-                  <option>This Month</option>
-                  <option>Last Month</option>
-                  <option>This Year</option>
-                </select>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SpendingDonut />
+              <SpendingDonut
+                userId={effectiveUserHash}
+              />
               <div className="grid grid-cols-2 gap-4 pt-4">
                 {[
                   { name: "Canteen", color: "#4ade80" },

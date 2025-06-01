@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { useAuth } from "@/context/AuthContext";
 
-export function SpendingChart() {
+export function SpendingChart({ userId }) {
   const [weeklyData, setWeeklyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,7 +36,7 @@ export function SpendingChart() {
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${user.id}/weekly-spending`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/${userId}/weekly-spending`,
           {
             method: "GET",
             headers: {

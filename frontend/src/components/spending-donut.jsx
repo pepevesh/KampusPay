@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/context/AuthContext";
 
-export function SpendingDonut() {
+export function SpendingDonut({userId, token1}) {
   const [categoryData, setCategoryData] = useState([]); // State to hold category-wise data
   const [totalAmount, setTotalAmount] = useState(0); // State to hold total amount spent
   const { user, token } = useAuth(); // Replace with dynamic user ID (e.g., from context or session)
@@ -15,7 +15,7 @@ export function SpendingDonut() {
       try {
         console.log(user);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/category/${user?.id}/categories`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/category/${userId}/categories`,
           {
             headers: {
               "Content-Type": "application/json",
